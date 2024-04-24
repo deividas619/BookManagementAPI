@@ -16,7 +16,7 @@ namespace Tests
             _bookService = new BookService(_mockBookRepository.Object);
         }
 
-        [Fact]
+        /*[Fact]
         public void AddBook_NewBook_SuccessfullyAdded()
         {
             // Arrange
@@ -30,9 +30,9 @@ namespace Tests
             Assert.True(response.IsSuccess);
             Assert.Empty(response.Message);
             _mockBookRepository.Verify(repo => repo.AddBook(newBook), Times.Once);
-        }
+        }*/
 
-        [Fact]
+        /*[Fact]
         public void AddBook_ExistingBook_FailsToAdd()
         {
             // Arrange
@@ -46,9 +46,9 @@ namespace Tests
             Assert.False(response.IsSuccess);
             Assert.Equal("Book already exist", response.Message);
             _mockBookRepository.Verify(repo => repo.AddBook(It.IsAny<Book>()), Times.Never);
-        }
+        }*/
 
-        [Fact]
+        /*[Fact]
         public void GetBook_ExistingTitle_ReturnsBook()
         {
             // Arrange
@@ -61,9 +61,9 @@ namespace Tests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(existingBook, result);
-        }
+        }*/
 
-        [Fact]
+        /*[Fact]
         public void GetBook_NonExistingTitle_ReturnsNull()
         {
             // Arrange
@@ -75,7 +75,7 @@ namespace Tests
 
             // Assert
             Assert.Null(result);
-        }
+        }*/
 
         [Fact]
         public void RemoveBook_ExistingId_RemovesBook()

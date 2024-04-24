@@ -1,8 +1,9 @@
-﻿using System;
+﻿using BookManagementAPI.Models;
+using System;
 
-namespace BookManagementAPI.Models
+namespace BookManagementAPI.DTOs
 {
-    public class Book : CommonProperties
+    public class BookDto
     {
         public string Title { get; set; }
         public string Author { get; set; }

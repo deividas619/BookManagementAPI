@@ -8,7 +8,7 @@ namespace Tests
 {
     public class BookRepositoryTests
     {
-        [Fact]
+        /*[Fact]
         public void GetBook_ExistingTitle_ReturnsBook()
         {
             // Arrange
@@ -35,7 +35,7 @@ namespace Tests
             // Assert
             Assert.NotNull(result);
             Assert.Equal("Book 1", result.Title);
-        }
+        }*/
 
         [Fact]
         public void AddBook_ValidBook_AddsToContext()

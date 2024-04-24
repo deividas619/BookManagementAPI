@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using BookManagementAPI.DTOs;
 using BookManagementAPI.Models;
@@ -11,32 +12,45 @@ namespace BookManagementAPI.Controllers
     [Route("[controller]")]
     public class BookController : ControllerBase
     {
-        private readonly IBookService _service;
+        private readonly IBookService _bookService;
 
         public BookController(IBookService service)
         {
-            _service = service;
+            _bookService = service;
         }
 
-        [HttpGet("GetBook")]
+        [HttpGet("GetAllBooks")]
         [AllowAnonymous]
-        public ActionResult<Book> GetBooks([FromQuery] string title)
+        public List<Book> GetAllBooks()
         {
-            return _service.GetBook(title);
+            return _bookService.GetAllBooks();
         }
 
-        [HttpDelete("Remove")]
-        [Authorize(Roles = "Admin")]
-        public void RemoveBook([FromQuery] Guid id)
+        [HttpGet("GetBookByTitle")]
+        [AllowAnonymous]
+        public Book GetBookByTitle(string title)
         {
-            _service.RemoveBook(id);
+            return _bookService.GetBookByTitle(title);
         }
 
         [HttpPost("AddBook")]
-        [Authorize(Roles = "Admin")]
-        public ActionResult<ResponseDto> AddBook(Book book)
+        [Authorize(Roles = "Regular")]
+        public ActionResult<ResponseDto> AddBook([FromBody] BookDto book)
         {
-            return _service.AddBook(book);
+            var response = _bookService.AddBook(book.Title, book.Author, book.Publication, book.Genre);
+            if (!response.IsSuccess)
+                return BadRequest(response.Message);
+            return response;
+        }
+
+        [HttpDelete("RemoveBook")]
+        [Authorize(Roles = "Admin, Regular")]
+        public ActionResult<ResponseDto> RemoveBook([FromQuery] Guid id)
+        {
+            var response = _bookService.RemoveBook(id);
+            if (!response.IsSuccess)
+                return BadRequest(response.Message);
+            return response;
         }
     }
 }
