@@ -53,19 +53,33 @@ public class BookService(IBookRepository repository) : IBookService
     {
         try
         {
+            var genre = await GetGenre(genreDto);
             return await repository.AddBook(new Book
             {
                 Id = Guid.NewGuid(),
                 Title = title,
                 Author = author,
                 Publication = publication,
-                Genre = new Genre { Id = Guid.NewGuid(), Name = genre.Name },
+                Genre = genre,
                 CreatedByUserId = repository.GetUserId(userName)
             });
         }
         catch (Exception e)
         {
             Log.Error($"[{nameof(AddBook)}]: {e.Message}");
+            throw;
+        }
+    }
+
+    public async Task<Genre> GetGenre(GenreDto genre)
+    {
+        try
+        {
+            return await repository.GetGenre(genre);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{nameof(GetGenre)}]: {e.Message}");
             throw;
         }
     }
