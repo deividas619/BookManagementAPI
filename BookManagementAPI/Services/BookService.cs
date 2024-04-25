@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using BookManagementAPI.DTOs;
+using System.Threading.Tasks;
 using BookManagementAPI.Models;
 using BookManagementAPI.Services.Repositories;
+using Serilog;
 
 namespace BookManagementAPI.Services
 {
@@ -16,49 +16,90 @@ namespace BookManagementAPI.Services
             _bookRepository = repository;
         }
 
-        public ResponseDto AddBook(string title, string author, DateOnly publication, Genre genre)
+        public async Task<IEnumerable<Book>> GetAllBooks()
         {
-            var existingBook = _bookRepository.GetAllBooks().FirstOrDefault(b => b.Title == title && b.Author == author && b.Publication == publication);
-            if (existingBook is not null)
-                return new ResponseDto(false, "Book already exist");
-
-            var newBook = CreateBook(title, author, publication, genre);
-            _bookRepository.AddBook(newBook);
-            return new ResponseDto(true, "Book added successfully!");
-        }
-
-        public List<Book> GetAllBooks()
-        {
-            return _bookRepository.GetAllBooks();
-        }
-
-        public Book GetBookByTitle(string title)
-        {
-            return _bookRepository.GetBookByTitle(title);
-        }
-
-        public ResponseDto RemoveBook(Guid id)
-        {
-            var book = _bookRepository.GetBookById(id);
-            if (book is null)
-                return new ResponseDto(false, "Book doesn't exist!");
-            
-            _bookRepository.RemoveBook(id);
-            return new ResponseDto(true, "Book successfully removed!");
-        }
-
-        private Book CreateBook(string title, string author, DateOnly publication, Genre genre)
-        {
-            var book = new Book
+            try
             {
-                Id = Guid.NewGuid(),
-                Title = title,
-                Author = author,
-                Publication = publication,
-                Genre = genre
-            };
+                return await _bookRepository.GetAllBooks();
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[{nameof(GetAllBooks)}]: {e.Message}");
+                throw;
+            }
+            
+        }
 
-            return book;
+        public async Task<IEnumerable<Book>> GetBooksByTitle(string title)
+        {
+            try
+            {
+                return await _bookRepository.GetBooksByTitle(title);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[{nameof(GetBooksByTitle)}]: {e.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Book> GetBookById(Guid id)
+        {
+            try
+            {
+                return await _bookRepository.GetBookById(id);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[{nameof(GetBookById)}]: {e.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Book> AddBook(string title, string author, DateOnly publication, Genre genre)
+        {
+            try
+            {
+                return await _bookRepository.AddBook(new Book
+                {
+                    Id = Guid.NewGuid(),
+                    Title = title,
+                    Author = author,
+                    Publication = publication,
+                    Genre = genre
+                });
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[{nameof(AddBook)}]: {e.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Book> UpdateBook(Book currentBook)
+        {
+            try
+            {
+                return await _bookRepository.UpdateBook(currentBook);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[{nameof(UpdateBook)}]: {e.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Book> RemoveBookById(Guid id)
+        {
+            try
+            {
+                return await _bookRepository.RemoveBookById(id);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[{nameof(RemoveBookById)}]: {e.Message}");
+                throw;
+            }
         }
     }
 }

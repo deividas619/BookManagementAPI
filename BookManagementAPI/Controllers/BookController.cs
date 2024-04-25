@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using BookManagementAPI.DTOs;
 using BookManagementAPI.Models;
 using BookManagementAPI.Services;
+using System.Threading.Tasks;
 
 namespace BookManagementAPI.Controllers
 {
@@ -21,36 +23,70 @@ namespace BookManagementAPI.Controllers
 
         [HttpGet("GetAllBooks")]
         [AllowAnonymous]
-        public List<Book> GetAllBooks()
+        public async Task<ActionResult<IEnumerable<Book>>> GetAllBooks()
         {
-            return _bookService.GetAllBooks();
+            var result = await _bookService.GetAllBooks();
+            if (!result.Any())
+                return BadRequest("There are no books in the database!");
+            return Ok(result);
         }
 
-        [HttpGet("GetBookByTitle")]
+        [HttpGet("GetBooksByTitle")]
         [AllowAnonymous]
-        public Book GetBookByTitle(string title)
+        public async Task<ActionResult<IEnumerable<Book>>> GetBookByTitle(string title)
         {
-            return _bookService.GetBookByTitle(title);
+            if (title is null)
+                return BadRequest("Book title was not provided!");
+
+            var result = await _bookService.GetBooksByTitle(title);
+
+            if (!result.Any())
+                return BadRequest("There are no books matching the title!");
+            return Ok(result);
+        }
+
+        [HttpGet("GetBookById")]
+        [AllowAnonymous]
+        public async Task<ActionResult<Book>> GetBookById(Guid id)
+        {
+            var result = await _bookService.GetBookById(id); ;
+
+            if (result is null)
+                return BadRequest("There are no books matching the id!");
+            return Ok(result);
         }
 
         [HttpPost("AddBook")]
         [Authorize(Roles = "Regular")]
-        public ActionResult<ResponseDto> AddBook([FromBody] BookDto book)
+        public async Task<ActionResult<Book>> AddBook([FromBody] BookDto book)
         {
-            var response = _bookService.AddBook(book.Title, book.Author, book.Publication, book.Genre);
-            if (!response.IsSuccess)
-                return BadRequest(response.Message);
-            return response;
+            var result = await _bookService.AddBook(book.Title, book.Author, book.Publication, book.Genre);
+            
+            if (result is null)
+                return BadRequest("Failed to add a book!");
+            return Ok(result);
         }
 
-        [HttpDelete("RemoveBook")]
+        [HttpPut("UpdateBook")]
         [Authorize(Roles = "Admin, Regular")]
-        public ActionResult<ResponseDto> RemoveBook([FromQuery] Guid id)
+        public async Task<ActionResult<Book>> UpdateBook([FromBody] Book currentBook)
         {
-            var response = _bookService.RemoveBook(id);
-            if (!response.IsSuccess)
-                return BadRequest(response.Message);
-            return response;
+            var result = await _bookService.UpdateBook(currentBook);
+            
+            if (result is null)
+                return BadRequest("Failed to update a book!");
+            return Ok(result);
+        }
+
+        [HttpDelete("RemoveBookById")]
+        [Authorize(Roles = "Admin, Regular")]
+        public async Task<ActionResult<Book>> RemoveBookById([FromQuery] Guid id)
+        {
+            var result = await _bookService.RemoveBookById(id);
+            
+            if (result is null)
+                return BadRequest("Failed to delete a book!");
+            return Ok(result);
         }
     }
 }

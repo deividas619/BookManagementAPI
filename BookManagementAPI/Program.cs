@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using BookManagementAPI.Services;
 using BookManagementAPI.Services.Repositories;
+using Serilog;
 
 namespace BookManagementAPI
 {
@@ -18,6 +19,10 @@ namespace BookManagementAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

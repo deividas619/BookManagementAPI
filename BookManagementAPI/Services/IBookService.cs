@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using BookManagementAPI.DTOs;
+using System.Threading.Tasks;
 using BookManagementAPI.Models;
 
 namespace BookManagementAPI.Services
 {
     public interface IBookService
     {
-        ResponseDto AddBook(string title, string author, DateOnly publication, Genre genre);
-        List<Book> GetAllBooks();
-        Book GetBookByTitle(string title);
-        ResponseDto RemoveBook(Guid id);
+        Task<IEnumerable<Book>> GetAllBooks();
+        Task<IEnumerable<Book>> GetBooksByTitle(string title);
+        Task<Book> GetBookById(Guid id);
+        Task<Book> AddBook(string title, string author, DateOnly publication, Genre genre);
+        Task<Book> UpdateBook(Book currentBook);
+        Task<Book> RemoveBookById(Guid id);
     }
 }
