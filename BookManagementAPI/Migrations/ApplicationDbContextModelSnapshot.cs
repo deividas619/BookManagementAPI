@@ -31,6 +31,9 @@ namespace BookManagementAPI.Migrations
                     b.Property<string>("Author")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("GenreId")
                         .HasColumnType("uniqueidentifier");
 

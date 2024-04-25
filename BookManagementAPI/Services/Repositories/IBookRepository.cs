@@ -14,5 +14,6 @@ namespace BookManagementAPI.Services.Repositories
         Task<Book> AddBook(Book book);
         Task<Book> UpdateBook(Book currentBook);
         Task<Book> RemoveBookById(Guid id);
+        Guid GetUserId(string username);
     }
 }

@@ -102,7 +102,8 @@ namespace BookManagementAPI.Services.Repositories
                     Author = currentBook.Author,
                     Title = currentBook.Title,
                     Publication = currentBook.Publication,
-                    Genre = currentBook.Genre
+                    Genre = currentBook.Genre,
+                    CreatedByUserId = currentBook.CreatedByUserId
                 };
                 _context.Update(newBook);
                 await _context.SaveChangesAsync();
@@ -141,6 +142,10 @@ namespace BookManagementAPI.Services.Repositories
                 Log.Error($"[{nameof(RemoveBookById)}]: {e.Message}");
                 throw;
             }
+        }
+        public Guid GetUserId(string username)
+        {
+            return _context.Users.SingleOrDefault(x => x.Username == username).Id;
         }
     }
 }

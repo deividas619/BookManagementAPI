@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookManagementAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240424195825_init")]
+    [Migration("20240425191445_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -33,6 +33,9 @@ namespace BookManagementAPI.Migrations
 
                     b.Property<string>("Author")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("GenreId")
                         .HasColumnType("uniqueidentifier");

@@ -49,7 +49,7 @@ public class BookService(IBookRepository repository) : IBookService
         }
     }
 
-    public async Task<Book> AddBook(string title, string author, DateOnly publication, GenreDto genre)
+    public async Task<Book> AddBook(string title, string author, DateOnly publication, GenreDto genre, string userName)
     {
         try
         {
@@ -59,7 +59,8 @@ public class BookService(IBookRepository repository) : IBookService
                 Title = title,
                 Author = author,
                 Publication = publication,
-                Genre = new Genre { Id = Guid.NewGuid(), Name = genre.Name }
+                Genre = new Genre { Id = Guid.NewGuid(), Name = genre.Name },
+                CreatedByUserId = repository.GetUserId(userName)
             });
         }
         catch (Exception e)
@@ -69,16 +70,23 @@ public class BookService(IBookRepository repository) : IBookService
         }
     }
 
-    public async Task<Book> UpdateBook(Book currentBook)
+    public async Task<Book> UpdateBook(Book currentBook, string userName)
     {
-        try
+        if (repository.GetUserId(userName) == currentBook.CreatedByUserId)
         {
-            return await repository.UpdateBook(currentBook);
+            try
+            {
+                return await repository.UpdateBook(currentBook);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[{nameof(UpdateBook)}]: {e.Message}");
+                throw;
+            }
         }
-        catch (Exception e)
+        else
         {
-            Log.Error($"[{nameof(UpdateBook)}]: {e.Message}");
-            throw;
+            return null;
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using BookManagementAPI.DTOs;
 using BookManagementAPI.Models;
@@ -51,10 +52,11 @@ public class BookController(IBookService service) : ControllerBase
     }
 
     [HttpPost("AddBook")]
-    [Authorize(Roles = "Regular")]
+    [Authorize(Roles = "Admin, Regular")]
     public async Task<ActionResult<Book>> AddBook([FromBody] BookDto book)
     {
-        var result = await service.AddBook(book.Title, book.Author, book.Publication, book.Genre);
+        var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
+        var result = await service.AddBook(book.Title, book.Author, book.Publication, book.Genre, userName);
 
         if (result is null)
             return BadRequest("Failed to add a book!");
@@ -65,7 +67,8 @@ public class BookController(IBookService service) : ControllerBase
     [Authorize(Roles = "Admin, Regular")]
     public async Task<ActionResult<Book>> UpdateBook([FromBody] Book currentBook)
     {
-        var result = await service.UpdateBook(currentBook);
+        var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
+        var result = await service.UpdateBook(currentBook, userName);
 
         if (result is null)
             return BadRequest("Failed to update a book!");
