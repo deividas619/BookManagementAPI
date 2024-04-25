@@ -1,13 +1,11 @@
-﻿using BookManagementAPI.Models;
-using System;
+﻿using System;
 
-namespace BookManagementAPI.DTOs
+namespace BookManagementAPI.DTOs;
+
+public class BookDto
 {
-    public class BookDto
-    {
-        public string Title { get; set; }
-        public string Author { get; set; }
-        public DateOnly Publication { get; set; }
-        public Genre Genre { get; set; }
-    }
+    public string Title { get; set; }
+    public string Author { get; set; }
+    public DateOnly Publication { get; set; }
+    public GenreDto Genre { get; set; }
 }
