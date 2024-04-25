@@ -13,8 +13,5 @@ namespace BookManagementAPI
 
         }
 
-        public ApplicationDbContext()
-        {
-        }
     }
 }

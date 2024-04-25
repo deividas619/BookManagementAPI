@@ -57,36 +57,17 @@ namespace BookManagementAPI.Controllers
         }
 
         [HttpPost("AddBook")]
-        [Authorize(Roles = "Regular")]
+        [Authorize(Roles = "Admin, Regular")]
         public async Task<ActionResult<Book>> AddBook([FromBody] BookDto book)
         {
-            var result = await _bookService.AddBook(book.Title, book.Author, book.Publication, book.Genre);
-            
+            var result = await service.AddBook(book.Title, book.Author, book.Publication, book.Genre);
+
             if (result is null)
                 return BadRequest("Failed to add a book!");
             return Ok(result);
         }
 
-        [HttpPut("UpdateBook")]
-        [Authorize(Roles = "Admin, Regular")]
-        public async Task<ActionResult<Book>> UpdateBook([FromBody] Book currentBook)
-        {
-            var result = await _bookService.UpdateBook(currentBook);
-            
-            if (result is null)
-                return BadRequest("Failed to update a book!");
-            return Ok(result);
-        }
 
-        [HttpDelete("RemoveBookById")]
-        [Authorize(Roles = "Admin, Regular")]
-        public async Task<ActionResult<Book>> RemoveBookById([FromQuery] Guid id)
-        {
-            var result = await _bookService.RemoveBookById(id);
-            
-            if (result is null)
-                return BadRequest("Failed to delete a book!");
-            return Ok(result);
-        }
+
     }
 }

@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/BookManagementAPI/DTOs/GenreDto.cs
+/BookManagementAPI/Models/Review.cs
+/BookManagementAPI/Services/BookService.cs
