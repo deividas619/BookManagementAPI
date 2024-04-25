@@ -51,7 +51,7 @@ public class BookController(IBookService service) : ControllerBase
     }
 
     [HttpPost("AddBook")]
-    [Authorize(Roles = "Regular")]
+    [Authorize(Roles = "Admin, Regular")]
     public async Task<ActionResult<Book>> AddBook([FromBody] BookDto book)
     {
         var result = await service.AddBook(book.Title, book.Author, book.Publication, book.Genre);
