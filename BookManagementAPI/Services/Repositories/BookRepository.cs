@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using BookManagementAPI.Models;
 using Serilog;
 using System.Linq;
+using BookManagementAPI.DTOs;
 
 namespace BookManagementAPI.Services.Repositories
 {
@@ -142,5 +143,48 @@ namespace BookManagementAPI.Services.Repositories
                 throw;
             }
         }
+
+        public async Task<IEnumerable<Book>> GetBooksByFilter(SearchFilterDto filter, int skip, int take)
+        {
+			try
+            {
+                var result = _context.Books.AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(filter.Title))
+					result = result.Where(b => b.Title.Contains(filter.Title));
+
+                if (!string.IsNullOrWhiteSpace(filter.Author))
+                    result = result.Where(b => b.Author.Contains(filter.Author));
+
+                if (filter.Genres != null && filter.Genres.Length > 0)
+                    result = result.Where(b => filter.Genres.Contains(b.Genre.Name));
+
+                if (filter.PublicationFromDate != null)
+                    result = result.Where(b => b.Publication >= filter.PublicationFromDate);
+
+                if (filter.PublicationToDate != null)
+                    result = result.Where(b => b.Publication <= filter.PublicationToDate);
+
+                result = result.Skip(skip).Take(take);
+
+				Log.Information($"[{nameof(GetBooksByFilter)}]: Returned books by filter:" +
+                    $"Title -> {filter.Title};" +
+                    $"Author -> {filter.Author};" +
+                    $"Genres -> {filter.Genres};" +
+                    $"PublicationFromDate -> {filter.PublicationFromDate};" +
+                    $"PublicationToDate -> {filter.PublicationToDate};" +
+                    $"Skip -> {skip};" +
+                    $"Take -> {take}!"); 
+
+                var output = await result.ToListAsync();
+
+				return output;
+			}
+			catch (Exception e)
+            {
+				Log.Error($"[{nameof(GetBooksByFilter)}]: {e.Message}");
+				throw;
+			}
+		}
     }
 }
