@@ -151,19 +151,19 @@ namespace BookManagementAPI.Services.Repositories
                 var result = _context.Books.AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(filter.Title))
-					result = result.Where(b => b.Title.Contains(filter.Title));
+					result = result.Where(b => b.Title.Contains(filter.Title, StringComparison.InvariantCultureIgnoreCase));
 
                 if (!string.IsNullOrWhiteSpace(filter.Author))
-                    result = result.Where(b => b.Author.Contains(filter.Author));
+                    result = result.Where(b => b.Author.Contains(filter.Author, StringComparison.InvariantCultureIgnoreCase));
 
                 if (filter.Genres != null && filter.Genres.Length > 0)
                     result = result.Where(b => filter.Genres.Contains(b.Genre.Name));
 
-                if (filter.PublicationFromDate != null)
-                    result = result.Where(b => b.Publication >= filter.PublicationFromDate);
+                if (filter.PublicationAfterDate != null)
+                    result = result.Where(b => b.Publication >= filter.PublicationAfterDate);
 
-                if (filter.PublicationToDate != null)
-                    result = result.Where(b => b.Publication <= filter.PublicationToDate);
+                if (filter.PublicationBeforeDate != null)
+                    result = result.Where(b => b.Publication <= filter.PublicationBeforeDate);
 
                 result = result.Skip(skip).Take(take);
 
@@ -171,8 +171,8 @@ namespace BookManagementAPI.Services.Repositories
                     $"Title -> {filter.Title};" +
                     $"Author -> {filter.Author};" +
                     $"Genres -> {filter.Genres};" +
-                    $"PublicationFromDate -> {filter.PublicationFromDate};" +
-                    $"PublicationToDate -> {filter.PublicationToDate};" +
+                    $"PublicationFromDate -> {filter.PublicationAfterDate};" +
+                    $"PublicationToDate -> {filter.PublicationBeforeDate};" +
                     $"Skip -> {skip};" +
                     $"Take -> {take}!"); 
 
