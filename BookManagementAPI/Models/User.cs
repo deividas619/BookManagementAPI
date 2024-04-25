@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace BookManagementAPI.Models
 {
@@ -8,5 +8,6 @@ namespace BookManagementAPI.Models
         public byte[] Password { get; set; }
         public byte[] PasswordSalt { get; set; }
         public string Role { get; set; }
+        //public virtual ICollection<Book> UserCreatedBooks { get; set; } = null;
     }
 }

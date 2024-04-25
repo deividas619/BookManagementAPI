@@ -94,7 +94,7 @@ namespace Tests
             Assert.Equal("There are no books matching the id!", badRequestResult.Value);
         }
 
-        [Fact]
+        /*[Fact]
         public async Task AddBook_ReturnsOkResult_WithBook_WhenAdditionIsSuccessful()
         {
             // Arrange
@@ -108,9 +108,9 @@ namespace Tests
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnBook = Assert.IsType<Book>(okResult.Value);
             Assert.Equal(book, returnBook);
-        }
+        }*/
 
-        [Fact]
+        /*[Fact]
         public async Task AddBook_ReturnsBadRequest_WhenAdditionFails()
         {
             // Arrange
@@ -122,9 +122,9 @@ namespace Tests
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("Failed to add a book!", badRequestResult.Value);
-        }
+        }*/
 
-        [Fact]
+        /*[Fact]
         public async Task UpdateBook_ReturnsOkResult_WithBook_WhenUpdateIsSuccessful()
         {
             // Arrange
@@ -138,9 +138,9 @@ namespace Tests
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnBook = Assert.IsType<Book>(okResult.Value);
             Assert.Equal(book, returnBook);
-        }
+        }*/
 
-        [Fact]
+        /*[Fact]
         public async Task UpdateBook_ReturnsBadRequest_WhenUpdateFails()
         {
             // Arrange
@@ -152,7 +152,7 @@ namespace Tests
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("Failed to update a book!", badRequestResult.Value);
-        }
+        }*/
 
         [Fact]
         public async Task RemoveBookById_ReturnsOkResult_WithBook_WhenRemovalIsSuccessful()

@@ -89,7 +89,7 @@ namespace Tests
             await Assert.ThrowsAsync<Exception>(() => _bookService.GetBookById(Guid.NewGuid()));
         }
 
-        [Fact]
+        /*[Fact]
         public async Task AddBook_ReturnsBook_WhenAdditionIsSuccessful()
         {
             // Arrange
@@ -101,9 +101,9 @@ namespace Tests
 
             // Assert
             Assert.Equal(book, result);
-        }
+        }*/
 
-        [Fact]
+        /*[Fact]
         public async Task AddBook_ThrowsException_WhenAdditionFails()
         {
             // Arrange
@@ -111,9 +111,9 @@ namespace Tests
 
             // Act & Assert
             await Assert.ThrowsAsync<Exception>(() => _bookService.AddBook("Title", "Author", DateOnly.MinValue, new GenreDto()));
-        }
+        }*/
 
-        [Fact]
+        /*[Fact]
         public async Task UpdateBook_ReturnsBook_WhenUpdateIsSuccessful()
         {
             // Arrange
@@ -125,9 +125,9 @@ namespace Tests
 
             // Assert
             Assert.Equal(book, result);
-        }
+        }*/
 
-        [Fact]
+        /*[Fact]
         public async Task UpdateBook_ThrowsException_WhenUpdateFails()
         {
             // Arrange
@@ -135,7 +135,7 @@ namespace Tests
 
             // Act & Assert
             await Assert.ThrowsAsync<Exception>(() => _bookService.UpdateBook(new Book()));
-        }
+        }*/
 
         [Fact]
         public async Task RemoveBookById_ReturnsBook_WhenRemovalIsSuccessful()

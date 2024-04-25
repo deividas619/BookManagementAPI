@@ -96,7 +96,8 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
                 Author = currentBook.Author,
                 Title = currentBook.Title,
                 Publication = currentBook.Publication,
-                Genre = currentBook.Genre
+                Genre = currentBook.Genre,
+                CreatedByUserId = currentBook.CreatedByUserId
             };
             context.Update(newBook);
             await context.SaveChangesAsync();
@@ -148,6 +149,10 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
         {
             Log.Error($"[{nameof(GetGenre)}]: {e.Message}");
             throw;
+        }
+        public Guid GetUserId(string username)
+        {
+            return _context.Users.SingleOrDefault(x => x.Username == username).Id;
         }
     }
 }
