@@ -99,7 +99,7 @@ namespace Tests
         {
             // Arrange
             var book = new Book();
-            _mockBookService.Setup(s => s.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<Genre>())).ReturnsAsync(book);
+            _mockBookService.Setup(s => s.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<GenreDto>())).ReturnsAsync(book);
 
             // Act
             var result = await _controller.AddBook(new BookDto());
@@ -114,7 +114,7 @@ namespace Tests
         public async Task AddBook_ReturnsBadRequest_WhenAdditionFails()
         {
             // Arrange
-            _mockBookService.Setup(s => s.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<Genre>())).ReturnsAsync((Book)null);
+            _mockBookService.Setup(s => s.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<GenreDto>())).ReturnsAsync((Book)null);
 
             // Act
             var result = await _controller.AddBook(new BookDto());

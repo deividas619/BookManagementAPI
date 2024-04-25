@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using BookManagementAPI.DTOs;
+using Moq;
 using BookManagementAPI.Models;
 using BookManagementAPI.Services.Repositories;
 using BookManagementAPI.Services;
@@ -96,7 +97,7 @@ namespace Tests
             _mockBookRepository.Setup(r => r.AddBook(It.IsAny<Book>())).ReturnsAsync(book);
 
             // Act
-            var result = await _bookService.AddBook("Title", "Author", DateOnly.MinValue, new Genre());
+            var result = await _bookService.AddBook("Title", "Author", DateOnly.MinValue, new GenreDto());
 
             // Assert
             Assert.Equal(book, result);
@@ -109,7 +110,7 @@ namespace Tests
             _mockBookRepository.Setup(r => r.AddBook(It.IsAny<Book>())).ThrowsAsync(new Exception());
 
             // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => _bookService.AddBook("Title", "Author", DateOnly.MinValue, new Genre()));
+            await Assert.ThrowsAsync<Exception>(() => _bookService.AddBook("Title", "Author", DateOnly.MinValue, new GenreDto()));
         }
 
         [Fact]
