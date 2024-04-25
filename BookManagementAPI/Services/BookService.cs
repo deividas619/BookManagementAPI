@@ -49,7 +49,7 @@ public class BookService(IBookRepository repository) : IBookService
         }
     }
 
-    public async Task<Book> AddBook(string title, string author, DateOnly publication, GenreDto genre, string userName)
+    public async Task<Book> AddBook(string title, string author, DateOnly publication, GenreDto genreDto, string userName)
     {
         try
         {

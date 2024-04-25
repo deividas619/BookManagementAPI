@@ -150,9 +150,10 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
             Log.Error($"[{nameof(GetGenre)}]: {e.Message}");
             throw;
         }
-        public Guid GetUserId(string username)
-        {
-            return _context.Users.SingleOrDefault(x => x.Username == username).Id;
-        }
+    }
+
+    public Guid GetUserId(string username)
+    {
+        return context.Users.SingleOrDefault(x => x.Username == username).Id;
     }
 }
