@@ -68,7 +68,8 @@ public class BookController(IBookService service) : ControllerBase
     public async Task<ActionResult<Book>> UpdateBook([FromBody] Book currentBook)
     {
         var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
-        var result = await service.UpdateBook(currentBook, userName);
+        var userNameRole = HttpContext.User.FindFirst(ClaimTypes.Role).Value;
+        var result = await service.UpdateBook(currentBook, userName, userNameRole);
 
         if (result is null)
             return BadRequest("Failed to update a book!");

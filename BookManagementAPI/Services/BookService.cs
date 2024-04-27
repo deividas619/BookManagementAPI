@@ -84,9 +84,9 @@ public class BookService(IBookRepository repository) : IBookService
         }
     }
 
-    public async Task<Book> UpdateBook(Book currentBook, string userName)
+    public async Task<Book> UpdateBook(Book currentBook, string userName, string userNameRole)
     {
-        if (repository.GetUserId(userName) == currentBook.CreatedByUserId)
+        if (repository.GetUserId(userName) == currentBook.CreatedByUserId || string.Compare(userNameRole, "Admin", StringComparison.OrdinalIgnoreCase) == 0)
         {
             try
             {
