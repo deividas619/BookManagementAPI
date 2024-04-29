@@ -56,13 +56,13 @@ public class BookController(IBookService service) : ControllerBase
         return Ok(result);
     }
 
-    [HttpPut("UpdateBook")]
+    [HttpPut("UpdateBook/{id}")]
     [Authorize(Roles = "Admin, Regular")]
-    public async Task<ActionResult<Book>> UpdateBook([FromBody] Book currentBook)
+    public async Task<ActionResult<Book>> UpdateBook([FromRoute]Guid id, [FromBody] BookDto currentBook)
     {
         var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
         var userNameRole = HttpContext.User.FindFirst(ClaimTypes.Role).Value;
-        var result = await service.UpdateBook(currentBook, userName, userNameRole);
+        var result = await service.UpdateBook(id, currentBook,userName, userNameRole);
 
         if (result is null)
             return BadRequest("Failed to update a book!");
