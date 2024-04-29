@@ -123,21 +123,12 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
 
         try
         {
-            var newBook = new Book
-            {
-                Id = currentBook.Id,
-                Author = currentBook.Author,
-                Title = currentBook.Title,
-                Publication = currentBook.Publication,
-                Genre = currentBook.Genre,
-                CreatedByUserId = currentBook.CreatedByUserId
-            };
-            context.Update(newBook);
+            context.Update(currentBook);
             await context.SaveChangesAsync();
 
             Log.Information($"[{nameof(UpdateBook)}]: Updated book with id: {currentBook.Id}!");
 
-            return newBook;
+            return currentBook;
         }
         catch (Exception e)
         {

@@ -74,31 +74,33 @@ public class BookService(IBookRepository repository) : IBookService
     public async Task<Book> UpdateBook(Guid bookId, BookDto currentBookDto, string userName, string userNameRole)
     {
         var currentBook = await repository.GetBookById(bookId);
-        if (repository.GetUserId(userName) == currentBook.CreatedByUserId || string.Compare(userNameRole, "Admin", StringComparison.OrdinalIgnoreCase) == 0)
+        if (currentBook is not null)
         {
-            try
+            if (repository.GetUserId(userName) == currentBook.CreatedByUserId || string.Compare(userNameRole, "Admin", StringComparison.OrdinalIgnoreCase) == 0)
             {
-                var book = new Book
+                try
                 {
-                    Id = currentBook.Id,
-                    Title = currentBookDto.Title,
-                    Author = currentBookDto.Author,
-                    Publication = currentBookDto.Publication,
-                    Genre = currentBook.Genre,
-                    CreatedByUserId = currentBook.CreatedByUserId
-                };
+                    currentBook.Title = currentBookDto.Title;
+                    currentBook.Author = currentBookDto.Author;
+                    currentBook.Publication = currentBookDto.Publication;
+                    currentBook.Genre = await GetGenre(currentBookDto.Genre);
 
-                return await repository.UpdateBook(book);
+                    return await repository.UpdateBook(currentBook);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[{nameof(UpdateBook)}]: {e.Message}");
+                    throw;
+                }
             }
-            catch (Exception e)
+            else
             {
-                Log.Error($"[{nameof(UpdateBook)}]: {e.Message}");
-                throw;
+                return null;
             }
         }
         else
         {
-            return null;
+            return currentBook;
         }
     }
 

@@ -62,7 +62,7 @@ public class BookController(IBookService service) : ControllerBase
     {
         var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
         var userNameRole = HttpContext.User.FindFirst(ClaimTypes.Role).Value;
-        var result = await service.UpdateBook(id, currentBook,userName, userNameRole);
+        var result = await service.UpdateBook(id, currentBook, userName, userNameRole);
 
         if (result is null)
             return BadRequest("Failed to update a book!");
