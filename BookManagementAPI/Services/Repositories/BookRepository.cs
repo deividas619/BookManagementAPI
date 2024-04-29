@@ -91,7 +91,7 @@ namespace BookManagementAPI.Services.Repositories
         {
             if (currentBook is null)
             {
-                Log.Error($"[{nameof(UpdateBook)}]: Could not find the book in the database by id: {currentBook.Id}!");
+                Log.Error($"[{nameof(UpdateBook)}]: Could not find the book in the database by id!");
                 return currentBook;
             }
 
@@ -148,6 +148,9 @@ namespace BookManagementAPI.Services.Repositories
         {
 			try
             {
+                if (take <= 0)
+                    take = 20;
+
                 var result = _context.Books.AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(filter.Title))
@@ -156,7 +159,7 @@ namespace BookManagementAPI.Services.Repositories
                 if (!string.IsNullOrWhiteSpace(filter.Author))
                     result = result.Where(b => b.Author.Contains(filter.Author, StringComparison.InvariantCultureIgnoreCase));
 
-                if (filter.Genres != null && filter.Genres.Length > 0)
+                if (filter.Genres is { Length: > 0 })
                     result = result.Where(b => filter.Genres.Contains(b.Genre.Name));
 
                 if (filter.PublicationAfterDate != null)
