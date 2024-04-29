@@ -23,28 +23,15 @@ public class BookService(IBookRepository repository) : IBookService
         }
     }
 
-    public async Task<IEnumerable<Book>> GetBooksByTitle(string title)
+    public async Task<IEnumerable<Book>> GetBooksByFilter(SearchFilterDto searchFilter, int skip, int take)
     {
         try
         {
-            return await repository.GetBooksByTitle(title);
+            return await repository.GetBooksByFilter(searchFilter, skip, take);
         }
         catch (Exception e)
         {
-            Log.Error($"[{nameof(GetBooksByTitle)}]: {e.Message}");
-            throw;
-        }
-    }
-
-    public async Task<Book> GetBookById(Guid id)
-    {
-        try
-        {
-            return await repository.GetBookById(id);
-        }
-        catch (Exception e)
-        {
-            Log.Error($"[{nameof(GetBookById)}]: {e.Message}");
+            Log.Error($"[{nameof(GetBooksByFilter)}]: {e.Message}");
             throw;
         }
     }
