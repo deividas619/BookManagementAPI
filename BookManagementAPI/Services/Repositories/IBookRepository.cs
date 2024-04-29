@@ -10,6 +10,7 @@ namespace BookManagementAPI.Services.Repositories
     {
         Task<IEnumerable<Book>> GetAllBooks();
         Task<IEnumerable<Book>> GetBooksByFilter(SearchFilterDto filter, int skip, int take);
+        Task<Book> GetBookById(Guid id);
         Task<Book> AddBook(Book book);
         Task<Book> UpdateBook(Book currentBook);
         Task<Book> RemoveBookById(Guid id);

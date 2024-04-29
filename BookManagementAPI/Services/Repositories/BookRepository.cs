@@ -78,6 +78,23 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
         }
     }
 
+    public async Task<Book> GetBookById(Guid id)
+    {
+        try
+        {
+            var output = await context.Books.Include(g => g.Genre).FirstOrDefaultAsync(b => b.Id == id);
+
+            Log.Information($"[{nameof(GetBookById)}]: Returned book by id: {id}!");
+
+            return output;
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{nameof(GetBookById)}]: {e.Message}");
+            throw;
+        }
+    }
+
     public async Task<Book> AddBook(Book book)
     {
         try

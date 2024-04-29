@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace BookManagementAPI.Models
+﻿namespace BookManagementAPI.Models
 {
     public class User : CommonProperties
     {
