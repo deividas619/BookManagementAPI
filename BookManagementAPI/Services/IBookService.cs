@@ -12,6 +12,6 @@ public interface IBookService
     Task<IEnumerable<Book>> GetBooksByTitle(string title);
     Task<Book> GetBookById(Guid id);
     Task<Book> AddBook(string title, string author, DateOnly publication, GenreDto genre, string userName);
-    Task<Book> UpdateBook(Book currentBook, string userName, string userNameRole);
+    Task<Book> UpdateBook(Guid currentBookId, BookDto currentBook, string userName, string userNameRole);
     Task<Book> RemoveBookById(Guid id);
 }

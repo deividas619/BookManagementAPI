@@ -84,13 +84,24 @@ public class BookService(IBookRepository repository) : IBookService
         }
     }
 
-    public async Task<Book> UpdateBook(Book currentBook, string userName, string userNameRole)
+    public async Task<Book> UpdateBook(Guid bookId, BookDto currentBookDto, string userName, string userNameRole)
     {
+        var currentBook = await repository.GetBookById(bookId);
         if (repository.GetUserId(userName) == currentBook.CreatedByUserId || string.Compare(userNameRole, "Admin", StringComparison.OrdinalIgnoreCase) == 0)
         {
             try
             {
-                return await repository.UpdateBook(currentBook);
+                var book = new Book
+                {
+                    Id = currentBook.Id,
+                    Title = currentBookDto.Title,
+                    Author = currentBookDto.Author,
+                    Publication = currentBookDto.Publication,
+                    Genre = currentBook.Genre,
+                    CreatedByUserId = currentBook.CreatedByUserId
+                };
+
+                return await repository.UpdateBook(book);
             }
             catch (Exception e)
             {
