@@ -30,7 +30,8 @@ namespace Tests
                 Id = Guid.NewGuid(),
                 Username = username,
                 Password = passwordHash,
-                PasswordSalt = passwordSalt
+                PasswordSalt = passwordSalt,
+                Role = UserRole.Regular
             };
 
             _mockUserRepository.Setup(repo => repo.GetUser(username)).Returns(user);
@@ -40,7 +41,7 @@ namespace Tests
 
             // Assert
             Assert.True(response.IsSuccess);
-            Assert.Equal("User logged in", response.Message);
+            Assert.Equal("User logged in!", response.Message);
         }
 
         [Fact]
@@ -57,7 +58,7 @@ namespace Tests
 
             // Assert
             Assert.False(response.IsSuccess);
-            Assert.Equal("Username or password does not match", response.Message);
+            Assert.Equal("Username or password does not match!", response.Message);
         }
 
         [Fact]
@@ -74,7 +75,7 @@ namespace Tests
 
             // Assert
             Assert.True(response.IsSuccess);
-            Assert.Null(response.Message);
+            Assert.Equal("User created!", response.Message);
             _mockUserRepository.Verify(repo => repo.SaveNewUser(It.IsAny<User>()), Times.Once);
         }
 
@@ -99,7 +100,7 @@ namespace Tests
 
             // Assert
             Assert.False(response.IsSuccess);
-            Assert.Equal("User already exists", response.Message);
+            Assert.Equal("User already exists!", response.Message);
             _mockUserRepository.Verify(repo => repo.SaveNewUser(It.IsAny<User>()), Times.Never);
         }
     }
