@@ -24,11 +24,12 @@ public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
         }
     }
 
-    public async Task<Review> AddReview(Review review)
+    public async Task<Review> AddReview(Book book, Review review)
     {
         try
         {
-            context.Reviews.Add(review);
+            //book.Reviews.Add(review);
+            context.Reviews.Add(review);//istrinti book
             await context.SaveChangesAsync();
             return review;
         }
@@ -78,6 +79,11 @@ public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
             Log.Error($"[{nameof(GetReviewsByBookTitle)}]: {e.Message}");
             throw;
         }
+    }
+
+    public async Task<IEnumerable<Review>> GetReviewsByBookId(Guid bookId)
+    {
+        return await context.Reviews.Where(r => r.Id == bookId).ToListAsync();
     }
 
 }

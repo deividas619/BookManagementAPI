@@ -10,7 +10,8 @@ namespace BookManagementAPI.Services.Repositories
     {
         Task<IEnumerable<Review>> GetAllReviews();
         Task<IEnumerable<Review>> GetReviewsByBookTitle(string bookTitle);
-        Task<Review> AddReview(Review review);
+        Task<IEnumerable<Review>> GetReviewsByBookId(Guid bookId);
+        Task<Review> AddReview(Book book, Review review);
         Task<Review> RemoveReviewById(Guid id);
         Guid GetUserId(string userName);
     }

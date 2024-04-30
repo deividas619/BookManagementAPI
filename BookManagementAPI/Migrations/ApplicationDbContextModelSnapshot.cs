@@ -90,7 +90,7 @@ namespace BookManagementAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("BookId")
+                    b.Property<Guid>("BookId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("BookTitle")
@@ -146,9 +146,13 @@ namespace BookManagementAPI.Migrations
 
             modelBuilder.Entity("BookManagementAPI.Models.Review", b =>
                 {
-                    b.HasOne("BookManagementAPI.Models.Book", null)
+                    b.HasOne("BookManagementAPI.Models.Book", "book")
                         .WithMany("Reviews")
-                        .HasForeignKey("BookId");
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("book");
                 });
 
             modelBuilder.Entity("BookManagementAPI.Models.Book", b =>

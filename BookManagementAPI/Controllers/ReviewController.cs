@@ -31,7 +31,7 @@ public class ReviewController : ControllerBase
 
     [HttpPost("AddReview")]
     [Authorize(Roles = "Admin, Regular")]
-    public async Task<ActionResult<Review>> AddReview([FromBody] ReviewDto reviewDto)
+    public async Task<ActionResult<Review>> AddReview([FromQuery] Guid id, [FromBody] ReviewDto reviewDto)
     {
         var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
 
@@ -41,16 +41,19 @@ public class ReviewController : ControllerBase
         }
 
         // Check if the book with the specified title exists
-        var filter = new SearchFilterDto { Title = reviewDto.BookTitle };
-        var existingBooks = await _bookRepository.GetBooksByFilter(filter, 0, 1);
-        var existingBook = existingBooks.FirstOrDefault();
+        //var filter = new SearchFilterDto { Title = reviewDto.BookTitle };
 
-        if (existingBook == null)
+        //var existingBooks = await _bookRepository.GetBooksByFilter(filter, 0, 1);
+        var filter2 = await _bookRepository.GetBookById(id);
+        //var existingBook = existingBooks.FirstOrDefault();
+
+
+        if (filter2 == null)
         {
             return BadRequest($"Book with title '{reviewDto.BookTitle}' does not exist.");
         }
 
-        var result = await _reviewService.AddReview(reviewDto, userName);
+        var result = await _reviewService.AddReview(filter2, reviewDto, userName);
 
         if (result == null)
             return BadRequest("Failed to add a review!");
@@ -81,14 +84,53 @@ public class ReviewController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("GetReviewsByBookTitle")]
+    [AllowAnonymous]
+    public async Task<ActionResult<IEnumerable<Review>>> GetReviewsByBookTitle(string bookTitle)
+    {
+        var reviews = await _reviewService.GetReviewsByBookTitle(bookTitle);
+        if (reviews == null)
+            return BadRequest($"No reviews found for the book with title '{bookTitle}'!");
+
+        return Ok(reviews);
+    }
+
+    [HttpGet("GetReviewsByBookId")]
+    [AllowAnonymous]
+    public async Task<ActionResult<IEnumerable<Review>>> GetReviewsByBookId(Guid bookId)
+    {
+        try
+        {
+            var reviews = await _reviewService.GetReviewsByBookId(bookId);
+            if (reviews == null || !reviews.Any())
+            {
+                return NotFound("No reviews found for the specified book.");
+            }
+            return Ok(reviews);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Error occurred while retrieving reviews by book ID: {e.Message}");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+
     [HttpGet("GetReviewsAndAverageRatingForBook")]
     [AllowAnonymous]
-    public async Task<ActionResult<(IEnumerable<Review> reviews, double averageRating)>> GetReviewsAndAverageRatingForBook(string bookTitle)
+    public async Task<ActionResult<ReviewWithAverageDto>> GetReviewsAndAverageRatingForBook(string bookTitle)
     {
         var result = await _reviewService.GetReviewsAndAverageRatingForBook(bookTitle);
         if (result.Item1 == null)
             return BadRequest($"No reviews found for the book with title '{bookTitle}'!");
-        return Ok(result.Item1);
+
+        var response = new ReviewWithAverageDto
+        {
+            Reviews = result.Item1,
+            AverageRating = result.Item2
+        };
+
+        return Ok(response);
     }
 
     [HttpGet("GetAverageRatingForBook")]

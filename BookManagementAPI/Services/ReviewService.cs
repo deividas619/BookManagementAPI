@@ -21,7 +21,7 @@ public class ReviewService : IReviewService
         _reviewRepository = reviewRepository;
         _bookRepository = bookRepository;
     }
-    public async Task<Review> AddReview(ReviewDto reviewDto, string userName)
+    public async Task<Review> AddReview(Book book, ReviewDto reviewDto, string userName)
     {
         try
         {
@@ -30,9 +30,10 @@ public class ReviewService : IReviewService
                 Text = reviewDto.Text,
                 Rating = reviewDto.Rating,
                 BookTitle = reviewDto.BookTitle,
+                BookId = book.Id,
                 CreatedByUserId = _reviewRepository.GetUserId(userName),
             };
-            return await _reviewRepository.AddReview(review);
+            return await _reviewRepository.AddReview(book, review);
         }
         catch (Exception e)
         {
@@ -65,6 +66,26 @@ public class ReviewService : IReviewService
             throw;
         }
     }
+
+    public async Task<IEnumerable<Review>> GetReviewsByBookTitle(string bookTitle)
+    {
+        try
+        {
+            return await _reviewRepository.GetReviewsByBookTitle(bookTitle);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{nameof(GetReviewsByBookTitle)}]: {e.Message}");
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<Review>> GetReviewsByBookId(Guid bookId)
+    {
+        return await _reviewRepository.GetReviewsByBookId(bookId);
+    }
+
+
     public async Task<(IEnumerable<Review>, double)> GetReviewsAndAverageRatingForBook(string bookTitle)
     {
         try

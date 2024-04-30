@@ -11,9 +11,10 @@ namespace BookManagementAPI.Services;
 public interface IReviewService
 {
     Task<(IEnumerable<Review>, double)> GetReviewsAndAverageRatingForBook(string bookTitle);
+    Task<IEnumerable<Review>> GetReviewsByBookTitle(string bookTitle);
+    Task<IEnumerable<Review>> GetReviewsByBookId(Guid bookId);
     Task<double?> GetAverageRatingForBook(string bookTitle);
-
     Task<IEnumerable<Review>> GetAllReviews();
-    Task<Review> AddReview(ReviewDto reviewDto, string userName);
+    Task<Review> AddReview(Book book, ReviewDto reviewDto, string userName);
     Task<Review> RemoveReviewById(Guid id);
 }
