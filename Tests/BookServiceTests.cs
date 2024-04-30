@@ -18,147 +18,195 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetAllBooks_ReturnsListOfBooks_WhenBooksExist()
+        public async Task GetAllBooks_ReturnsAllBooksFromRepository()
         {
             // Arrange
-            var books = new List<Book> { new Book(), new Book() };
-            _mockBookRepository.Setup(r => r.GetAllBooks()).ReturnsAsync(books);
+            var books = new List<Book>
+            {
+                new Book { Id = Guid.NewGuid(), Title = "Book 1" },
+                new Book { Id = Guid.NewGuid(), Title = "Book 2" },
+                new Book { Id = Guid.NewGuid(), Title = "Book 3" }
+            };
+            _mockBookRepository.Setup(repo => repo.GetAllBooks()).ReturnsAsync(books);
 
             // Act
             var result = await _bookService.GetAllBooks();
 
             // Assert
-            Assert.Equal(2, result.Count());
+            Assert.Equal(3, ((List<Book>)result).Count);
         }
 
         [Fact]
-        public async Task GetAllBooks_ThrowsException_WhenFailedToGetBooks()
+        public async Task GetAllBooks_ReturnsEmptyList_WhenNoBooksInRepository()
         {
             // Arrange
-            _mockBookRepository.Setup(r => r.GetAllBooks()).ThrowsAsync(new Exception());
-
-            // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => _bookService.GetAllBooks());
-        }
-
-        [Fact]
-        public async Task GetBooksByTitle_ReturnsListOfBooks_WhenBooksExist()
-        {
-            // Arrange
-            var books = new List<Book> { new Book(), new Book() };
-            _mockBookRepository.Setup(r => r.GetBooksByTitle(It.IsAny<string>())).ReturnsAsync(books);
+            _mockBookRepository.Setup(repo => repo.GetAllBooks()).ReturnsAsync(new List<Book>());
 
             // Act
-            var result = await _bookService.GetBooksByTitle("Title");
+            var result = await _bookService.GetAllBooks();
 
             // Assert
-            Assert.Equal(2, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
-        public async Task GetBooksByTitle_ThrowsException_WhenFailedToGetBooks()
+        public async Task GetBooksByFilter_ReturnsEmptyList_WhenNoBooksMatchFilter()
         {
             // Arrange
-            _mockBookRepository.Setup(r => r.GetBooksByTitle(It.IsAny<string>())).ThrowsAsync(new Exception());
+            var filter = new SearchFilterDto { Title = "Non-existing Title", Author = "Non-existing Author", Genres = new string[] { "Non-existing Genre" } };
+            _mockBookRepository.Setup(repo => repo.GetBooksByFilter(filter, 0, 0)).ReturnsAsync(new List<Book>());
 
-            // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => _bookService.GetBooksByTitle("Title"));
+            // Act
+            var result = await _bookService.GetBooksByFilter(filter, 0, 0);
+
+            // Assert
+            Assert.Empty(result);
         }
 
         [Fact]
-        public async Task GetBookById_ReturnsBook_WhenBookExists()
+        public async Task AddBook_ReturnsAddedBook()
         {
             // Arrange
-            var book = new Book();
-            _mockBookRepository.Setup(r => r.GetBookById(It.IsAny<Guid>())).ReturnsAsync(book);
+            var book = new Book { Id = Guid.NewGuid(), Title = "New Book" };
+            _mockBookRepository.Setup(repo => repo.AddBook(It.IsAny<Book>())).ReturnsAsync(book);
 
             // Act
-            var result = await _bookService.GetBookById(Guid.NewGuid());
+            var result = await _bookService.AddBook("New Book", "Author", new DateOnly(), new GenreDto { Name = "Genre" }, "UserName");
 
             // Assert
-            Assert.Equal(book, result);
+            Assert.Equal("New Book", result.Title);
         }
 
         [Fact]
-        public async Task GetBookById_ThrowsException_WhenFailedToGetBook()
+        public async Task AddBook_ReturnsNull_WhenTitleIsNull()
         {
             // Arrange
-            _mockBookRepository.Setup(r => r.GetBookById(It.IsAny<Guid>())).ThrowsAsync(new Exception());
+            var bookDto = new BookDto { Title = null, Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
 
-            // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => _bookService.GetBookById(Guid.NewGuid()));
+            // Act
+            var result = await _bookService.AddBook(bookDto.Title, bookDto.Author, bookDto.Publication, bookDto.Genre, "UserName");
+
+            // Assert
+            Assert.Null(result);
         }
 
-        /*[Fact]
-        public async Task AddBook_ReturnsBook_WhenAdditionIsSuccessful()
+        [Fact]
+        public async Task AddBook_ReturnsNull_WhenRepositoryFailsToAddBook()
         {
             // Arrange
-            var book = new Book();
-            _mockBookRepository.Setup(r => r.AddBook(It.IsAny<Book>())).ReturnsAsync(book);
+            _mockBookRepository.Setup(repo => repo.GetGenre(It.IsAny<GenreDto>())).ReturnsAsync(new Genre());
+            _mockBookRepository.Setup(repo => repo.AddBook(It.IsAny<Book>())).ReturnsAsync((Book)null);
 
             // Act
-            var result = await _bookService.AddBook("Title", "Author", DateOnly.MinValue, new GenreDto());
+            var result = await _bookService.AddBook("New Book", "Author", new DateOnly(), new GenreDto { Name = "Genre" }, "UserName");
 
             // Assert
-            Assert.Equal(book, result);
-        }*/
+            Assert.Null(result);
+        }
 
-        /*[Fact]
-        public async Task AddBook_ThrowsException_WhenAdditionFails()
+        [Fact]
+        public async Task AddBook_ReturnsNull_WhenPublicationDateIsInFuture()
         {
             // Arrange
-            _mockBookRepository.Setup(r => r.AddBook(It.IsAny<Book>())).ThrowsAsync(new Exception());
-
-            // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => _bookService.AddBook("Title", "Author", DateOnly.MinValue, new GenreDto()));
-        }*/
-
-        /*[Fact]
-        public async Task UpdateBook_ReturnsBook_WhenUpdateIsSuccessful()
-        {
-            // Arrange
-            var book = new Book();
-            _mockBookRepository.Setup(r => r.UpdateBook(It.IsAny<Book>())).ReturnsAsync(book);
+            var futureDate = new DateOnly(DateTime.Now.Year + 1, 1, 1);
+            var bookDto = new BookDto { Title = "Future Book", Author = "Author", Publication = futureDate, Genre = new GenreDto { Name = "Genre" } };
 
             // Act
-            var result = await _bookService.UpdateBook(new Book());
+            var result = await _bookService.AddBook(bookDto.Title, bookDto.Author, bookDto.Publication, bookDto.Genre, "UserName");
 
             // Assert
-            Assert.Equal(book, result);
-        }*/
+            Assert.Null(result);
+        }
 
-        /*[Fact]
-        public async Task UpdateBook_ThrowsException_WhenUpdateFails()
+        [Fact]
+        public async Task GetGenre_ReturnsExistingGenreFromRepository()
         {
             // Arrange
-            _mockBookRepository.Setup(r => r.UpdateBook(It.IsAny<Book>())).ThrowsAsync(new Exception());
+            var genreDto = new GenreDto { Name = "ExistingGenre" };
+            var existingGenre = new Genre { Id = Guid.NewGuid(), Name = "ExistingGenre" };
+            _mockBookRepository.Setup(repo => repo.GetGenre(genreDto)).ReturnsAsync(existingGenre);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => _bookService.UpdateBook(new Book()));
-        }*/
+            // Act
+            var result = await _bookService.GetGenre(genreDto);
+
+            // Assert
+            Assert.Equal(existingGenre, result);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ReturnsNull_WhenBookNotFound()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            _mockBookRepository.Setup(repo => repo.GetBookById(bookId)).ReturnsAsync((Book)null);
+
+            // Act
+            var result = await _bookService.UpdateBook(bookId, new BookDto(), "UserName", "Admin");
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ReturnsNull_WhenRepositoryFailsToUpdateBook()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var bookDto = new BookDto { Title = "Updated Book", Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
+            _mockBookRepository.Setup(repo => repo.GetBookById(bookId)).ReturnsAsync(new Book { Id = bookId });
+            _mockBookRepository.Setup(repo => repo.UpdateBook(It.IsAny<Book>())).ReturnsAsync((Book)null);
+
+            // Act
+            var result = await _bookService.UpdateBook(bookId, bookDto, "UserName", "Admin");
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ReturnsNull_WhenUserIsNotAdminOrCreator()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var book = new Book { Id = bookId, CreatedByUserId = Guid.NewGuid() };
+            _mockBookRepository.Setup(repo => repo.GetBookById(bookId)).ReturnsAsync(book);
+
+            // Act
+            var result = await _bookService.UpdateBook(bookId, new BookDto(), "NonCreatorUserName", "NonAdminRole");
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task RemoveBookById_ReturnsNull_WhenBookNotFound()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            _mockBookRepository.Setup(repo => repo.RemoveBookById(bookId)).ReturnsAsync((Book)null);
+
+            // Act
+            var result = await _bookService.RemoveBookById(bookId);
+
+            // Assert
+            Assert.Null(result);
+        }
 
         [Fact]
         public async Task RemoveBookById_ReturnsBook_WhenRemovalIsSuccessful()
         {
             // Arrange
-            var book = new Book();
-            _mockBookRepository.Setup(r => r.RemoveBookById(It.IsAny<Guid>())).ReturnsAsync(book);
+            var bookId = Guid.NewGuid();
+            var bookToRemove = new Book { Id = bookId, Title = "Book to Remove", Author = "Author", Publication = new DateOnly(), Genre = new Genre { Name = "Genre" } };
+            _mockBookRepository.Setup(repo => repo.RemoveBookById(bookId)).ReturnsAsync(bookToRemove);
 
             // Act
-            var result = await _bookService.RemoveBookById(Guid.NewGuid());
+            var result = await _bookService.RemoveBookById(bookId);
 
             // Assert
-            Assert.Equal(book, result);
-        }
-
-        [Fact]
-        public async Task RemoveBookById_ThrowsException_WhenRemovalFails()
-        {
-            // Arrange
-            _mockBookRepository.Setup(r => r.RemoveBookById(It.IsAny<Guid>())).ThrowsAsync(new Exception());
-
-            // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => _bookService.RemoveBookById(Guid.NewGuid()));
+            Assert.NotNull(result);
+            Assert.Equal(bookId, result.Id);
+            Assert.Equal("Book to Remove", result.Title);
         }
     }
 }
