@@ -17,13 +17,12 @@ namespace BookManagementAPI.Services
             _configuration = configuration;
         }
 
-        public string GetJwtToken(string username, UserRole role) //Augustas string to UserRole
+        public string GetJwtToken(string username, UserRole role)
         {
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
-                //new Claim(ClaimTypes.Role, role) //Augustas: commented due to user roles enum
-                new Claim(ClaimTypes.Role, role.ToString()) //Augustas: user roles enum
+                new Claim(ClaimTypes.Role, role.ToString())
             };
 
             var secretToken = _configuration.GetSection("Jwt:Key").Value;

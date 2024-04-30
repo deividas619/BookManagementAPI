@@ -7,9 +7,9 @@ namespace BookManagementAPI.DTOs
     {
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
-        [JsonConverter(typeof(JsonStringEnumConverter))] //Augustas: Ensures the enum is serialized as a string
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public UserRole? Role { get; set; } //Augustas: string to UserRole?
+        public UserRole? Role { get; set; }
 
         public ResponseDto(bool isSuccess)
         {
@@ -20,7 +20,7 @@ namespace BookManagementAPI.DTOs
             IsSuccess = isSuccess;
             Message = message;
         }
-        public ResponseDto(bool isSuccess, string message, UserRole role) //Augustas: string to UserRole
+        public ResponseDto(bool isSuccess, string message, UserRole role)
         {
             IsSuccess = isSuccess;
             Message = message;

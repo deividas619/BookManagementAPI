@@ -45,8 +45,7 @@ public class BookController(IBookService service) : ControllerBase
     }
 
     [HttpPost("AddBook")]
-    //[Authorize(Roles = "Admin, Regular")] //Augustas: commented due to user roles enum
-    [Authorize(Roles = nameof(UserRole.Admin) + ", " + nameof(UserRole.Regular))] //Augustas: user roles enum
+    [Authorize(Roles = nameof(UserRole.Admin) + ", " + nameof(UserRole.Regular))]
     public async Task<ActionResult<Book>> AddBook([FromBody] BookDto book)
     {
         var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
@@ -58,8 +57,7 @@ public class BookController(IBookService service) : ControllerBase
     }
 
     [HttpPut("UpdateBook/{id}")]
-    //[Authorize(Roles = "Admin, Regular")] //Augustas: commented due to user roles enum
-    [Authorize(Roles = nameof(UserRole.Admin) + ", " + nameof(UserRole.Regular))] //Augustas: user roles enum
+    [Authorize(Roles = nameof(UserRole.Admin) + ", " + nameof(UserRole.Regular))]
     public async Task<ActionResult<Book>> UpdateBook([FromRoute]Guid id, [FromBody] BookDto currentBook)
     {
         var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
@@ -72,8 +70,7 @@ public class BookController(IBookService service) : ControllerBase
     }
 
     [HttpDelete("RemoveBookById")]
-    //[Authorize(Roles = "Admin, Regular")] //Augustas: commented due to user roles enum
-    [Authorize(Roles = nameof(UserRole.Admin) + ", " + nameof(UserRole.Regular))] //Augustas: user roles enum
+    [Authorize(Roles = nameof(UserRole.Admin) + ", " + nameof(UserRole.Regular))]
     public async Task<ActionResult<Book>> RemoveBookById([FromQuery] Guid id)
     {
         var result = await service.RemoveBookById(id);

@@ -17,7 +17,7 @@ namespace BookManagementAPI
         public ApplicationDbContext()
         {
         }
-        protected override void OnModelCreating(ModelBuilder modelBuilder) //Augustas: for user roles functionality
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
            
