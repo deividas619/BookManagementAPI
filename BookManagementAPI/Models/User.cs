@@ -9,5 +9,5 @@ public class User : CommonProperties
 
     // public string Role { get; set; }
     //public virtual ICollection<Book> UserCreatedBooks { get; set; } = null;
-    public UserRole Role { get; set; } = UserRole.Guest; //Augustas: for user roles
+    public UserRole Role { get; set; } //Augustas: for user roles
 }
