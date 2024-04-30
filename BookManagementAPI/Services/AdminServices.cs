@@ -122,7 +122,7 @@ namespace BookManagementAPI.Services
             if (user == null)
                 return new ResponseDto(false, "User not found");
 
-            user.Role = "Admin"; 
+            user.Role = UserRole.Admin; 
             _userRepository.SaveChangedUser(user);
 
             return new ResponseDto(true, "User role changed to Admin successfully");
@@ -134,7 +134,7 @@ namespace BookManagementAPI.Services
             if (user == null)
                 return new ResponseDto(false, "User not found");
 
-            user.Role = "Regular"; 
+            user.Role = UserRole.Regular; 
             _userRepository.SaveChangedUser(user);
 
             return new ResponseDto(true, "User role changed to Regular successfully");
