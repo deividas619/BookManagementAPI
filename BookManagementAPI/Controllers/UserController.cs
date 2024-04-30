@@ -17,12 +17,14 @@ public class UserController(IUserService userService, IJwtService jwtService) : 
         var response = userService.Login(username, password);
         if (!response.IsSuccess)
             return BadRequest(response.Message);
+
         //Augustas: if added (1)
         if (response.Role.HasValue)
         {
             var token = jwtService.GetJwtToken(username, response.Role.Value);
             return Ok(new { Token = token });
         }
+
         //return Ok(jwtService.GetJwtToken(username, response.Role)); //Augustas commented due to 1 and 2
         return BadRequest("Role information is missing or invalid."); //Augustas return added (2)
     }
