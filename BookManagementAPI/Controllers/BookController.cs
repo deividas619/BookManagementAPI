@@ -25,26 +25,19 @@ public class BookController(IBookService service) : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("GetBooksByTitle")]
+    [HttpPost("GetBooksByFilter")]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<Book>>> GetBookByTitle(string title)
+    public async Task<ActionResult<Book>> GetBooksByFilter(string? title, string? author, string[] genres, DateOnly? publicationAfterDate, DateOnly? publicationBeforeDate)
     {
-        if (title is null)
-            return BadRequest("Book title was not provided!");
-
-        var result = await service.GetBooksByTitle(title);
-
-        if (!result.Any())
-            return BadRequest("There are no books matching the title!");
-        return Ok(result);
-    }
-
-    [HttpGet("GetBookById")]
-    [AllowAnonymous]
-    public async Task<ActionResult<Book>> GetBookById(Guid id)
-    {
-        var result = await service.GetBookById(id);
-        ;
+        var searchFilter = new SearchFilterDto
+        {
+            Title = title,
+            Author = author,
+            Genres = genres,
+            PublicationAfterDate = publicationAfterDate,
+            PublicationBeforeDate = publicationBeforeDate
+        };
+        var result = await service.GetBooksByFilter(searchFilter, 0, 0);
 
         if (result is null)
             return BadRequest("There are no books matching the id!");
@@ -53,7 +46,7 @@ public class BookController(IBookService service) : ControllerBase
 
     [HttpPost("AddBook")]
     [Authorize(Roles = "Admin, Regular")]
-    public async Task<ActionResult<Book>> AddBook([FromBody] BookDto book)
+    public async Task<ActionResult<BookDto>> AddBook([FromBody] BookDto book)
     {
         var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
         var result = await service.AddBook(book.Title, book.Author, book.Publication, book.Genre, userName);
@@ -63,13 +56,13 @@ public class BookController(IBookService service) : ControllerBase
         return Ok(result);
     }
 
-    [HttpPut("UpdateBook")]
+    [HttpPut("UpdateBook/{id}")]
     [Authorize(Roles = "Admin, Regular")]
-    public async Task<ActionResult<Book>> UpdateBook([FromBody] Book currentBook)
+    public async Task<ActionResult<Book>> UpdateBook([FromRoute] Guid id, [FromBody] BookDto currentBook)
     {
         var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
         var userNameRole = HttpContext.User.FindFirst(ClaimTypes.Role).Value;
-        var result = await service.UpdateBook(currentBook, userName, userNameRole);
+        var result = await service.UpdateBook(id, currentBook, userName, userNameRole);
 
         if (result is null)
             return BadRequest("Failed to update a book!");

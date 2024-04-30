@@ -23,28 +23,15 @@ public class BookService(IBookRepository repository) : IBookService
         }
     }
 
-    public async Task<IEnumerable<Book>> GetBooksByTitle(string title)
+    public async Task<IEnumerable<Book>> GetBooksByFilter(SearchFilterDto searchFilter, int skip, int take)
     {
         try
         {
-            return await repository.GetBooksByTitle(title);
+            return await repository.GetBooksByFilter(searchFilter, skip, take);
         }
         catch (Exception e)
         {
-            Log.Error($"[{nameof(GetBooksByTitle)}]: {e.Message}");
-            throw;
-        }
-    }
-
-    public async Task<Book> GetBookById(Guid id)
-    {
-        try
-        {
-            return await repository.GetBookById(id);
-        }
-        catch (Exception e)
-        {
-            Log.Error($"[{nameof(GetBookById)}]: {e.Message}");
+            Log.Error($"[{nameof(GetBooksByFilter)}]: {e.Message}");
             throw;
         }
     }
@@ -84,13 +71,24 @@ public class BookService(IBookRepository repository) : IBookService
         }
     }
 
-    public async Task<Book> UpdateBook(Book currentBook, string userName, string userNameRole)
+    public async Task<Book> UpdateBook(Guid bookId, BookDto currentBookDto, string userName, string userNameRole)
     {
+        var currentBook = await repository.GetBookById(bookId);
         if (repository.GetUserId(userName) == currentBook.CreatedByUserId || string.Compare(userNameRole, "Admin", StringComparison.OrdinalIgnoreCase) == 0)
         {
             try
             {
-                return await repository.UpdateBook(currentBook);
+                var book = new Book
+                {
+                    Id = currentBook.Id,
+                    Title = currentBookDto.Title,
+                    Author = currentBookDto.Author,
+                    Publication = currentBookDto.Publication,
+                    Genre = currentBook.Genre,
+                    CreatedByUserId = currentBook.CreatedByUserId
+                };
+
+                return await repository.UpdateBook(book);
             }
             catch (Exception e)
             {

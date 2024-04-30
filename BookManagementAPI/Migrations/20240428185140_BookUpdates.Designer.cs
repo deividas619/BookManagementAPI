@@ -4,6 +4,7 @@ using BookManagementAPI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookManagementAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240428185140_BookUpdates")]
+    partial class BookUpdates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,9 +33,6 @@ namespace BookManagementAPI.Migrations
 
                     b.Property<string>("Author")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("GenreId")
                         .HasColumnType("uniqueidentifier");
@@ -70,13 +70,7 @@ namespace BookManagementAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("BookId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BookTitle")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CreatedByUserId")
+                    b.Property<Guid>("BookId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Rating")
@@ -85,11 +79,16 @@ namespace BookManagementAPI.Migrations
                     b.Property<string>("Text")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("Reviews");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Review");
                 });
 
             modelBuilder.Entity("BookManagementAPI.Models.User", b =>
@@ -126,9 +125,21 @@ namespace BookManagementAPI.Migrations
 
             modelBuilder.Entity("BookManagementAPI.Models.Review", b =>
                 {
-                    b.HasOne("BookManagementAPI.Models.Book", null)
+                    b.HasOne("BookManagementAPI.Models.Book", "Book")
                         .WithMany("Reviews")
-                        .HasForeignKey("BookId");
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BookManagementAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BookManagementAPI.Models.Book", b =>
