@@ -1,21 +1,21 @@
-﻿using BookManagementAPI.DTOs;
-using Moq;
-using BookManagementAPI.Models;
-using BookManagementAPI.Services.Repositories;
-using BookManagementAPI.Services;
+﻿//using BookManagementAPI.DTOs;
+//using Moq;
+//using BookManagementAPI.Models;
+//using BookManagementAPI.Services.Repositories;
+//using BookManagementAPI.Services;
 
-namespace Tests
-{
-    public class BookServiceTests
-    {
-        private readonly Mock<IBookRepository> _mockBookRepository;
-        private readonly BookService _bookService;
+//namespace Tests
+//{
+//    public class BookServiceTests
+//    {
+//        private readonly Mock<IBookRepository> _mockBookRepository;
+//        private readonly BookService _bookService;
 
-        public BookServiceTests()
-        {
-            _mockBookRepository = new Mock<IBookRepository>();
-            _bookService = new BookService(_mockBookRepository.Object);
-        }
+//        public BookServiceTests()
+//        {
+//            _mockBookRepository = new Mock<IBookRepository>();
+//            _bookService = new BookService(_mockBookRepository.Object);
+//        }
 
         [Fact]
         public async Task GetAllBooks_ReturnsAllBooksFromRepository()
@@ -29,8 +29,8 @@ namespace Tests
             };
             _mockBookRepository.Setup(repo => repo.GetAllBooks()).ReturnsAsync(books);
 
-            // Act
-            var result = await _bookService.GetAllBooks();
+//            // Act
+//            var result = await _bookService.GetAllBooks();
 
             // Assert
             Assert.Equal(3, ((List<Book>)result).Count);

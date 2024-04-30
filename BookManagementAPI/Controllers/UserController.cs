@@ -15,14 +15,11 @@ public class UserController(IUserService userService, IJwtService jwtService) : 
     public ActionResult<ResponseDto> Login(string username, string password)
     {
         var response = userService.Login(username, password);
+
         if (!response.IsSuccess)
             return BadRequest(response.Message);
-        if (response.Role.HasValue)
-        {
-            var token = jwtService.GetJwtToken(username, response.Role.Value);
-            return Ok(new { Token = token });
-        }
-        return BadRequest("Role information is missing or invalid.");
+
+        return Ok(jwtService.GetJwtToken(username, response.Role));
     }
 
     [HttpPost("Signup")]

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookManagementAPI.Models
 {
@@ -11,5 +13,6 @@ namespace BookManagementAPI.Models
         //[ForeignKey("CreatedByUser")]
         public Guid CreatedByUserId { get; set; }
         //public virtual User CreatedByUser { get; set; }
+        public virtual ICollection<Review> Reviews { get; set; } = null;
     }
 }

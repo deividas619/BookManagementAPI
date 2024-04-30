@@ -84,6 +84,34 @@ namespace BookManagementAPI.Migrations
                     b.ToTable("Genres");
                 });
 
+            modelBuilder.Entity("BookManagementAPI.Models.Review", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BookTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookId");
+
+                    b.ToTable("Reviews");
+                });
+
             modelBuilder.Entity("BookManagementAPI.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -114,6 +142,22 @@ namespace BookManagementAPI.Migrations
                         .HasForeignKey("GenreId");
 
                     b.Navigation("Genre");
+                });
+
+            modelBuilder.Entity("BookManagementAPI.Models.Review", b =>
+                {
+                    b.HasOne("BookManagementAPI.Models.Book", "book")
+                        .WithMany("Reviews")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("book");
+                });
+
+            modelBuilder.Entity("BookManagementAPI.Models.Book", b =>
+                {
+                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

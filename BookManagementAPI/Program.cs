@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using BookManagementAPI.Services;
 using BookManagementAPI.Services.Repositories;
 using Serilog;
+using System.Text.Json.Serialization;
 using System.Linq;
 
 namespace BookManagementAPI
@@ -25,7 +26,7 @@ namespace BookManagementAPI
                 .WriteTo.Console()
                 .CreateLogger();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddScoped<IBookService, BookService>();
             builder.Services.AddScoped<IBookRepository, BookRepository>();
@@ -33,6 +34,8 @@ namespace BookManagementAPI
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IAdminRepository, AdminRepository>();
             builder.Services.AddScoped<IAdminService, AdminServices>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             builder.Services.AddTransient<IJwtService, JwtService>();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
