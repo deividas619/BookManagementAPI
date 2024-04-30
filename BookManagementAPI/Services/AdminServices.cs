@@ -75,15 +75,21 @@ namespace BookManagementAPI.Services
         }
         public async Task<ResponseDto> DeleteBookAsync(Guid bookId)
         {
-            var existingBook = _bookRepository.GetBookById(bookId);
-            if (existingBook == null)
+            try
             {
-                return new ResponseDto(false, "Book not found");
+                var book = await _bookRepository.GetBookById(bookId);
+                if (book == null)
+                {
+                    return new ResponseDto(false, "Book not found");
+                }
+
+                await _bookRepository.RemoveBookById(bookId);
+                return new ResponseDto(true, "Book deleted successfully");
             }
-
-            _bookRepository.RemoveBookById(bookId);
-
-            return new ResponseDto(true, "Book deleted successfully");
+            catch (Exception ex)
+            {
+                return new ResponseDto(false, $"Failed to delete book: {ex.Message}");
+            }
         }
         public async Task<ResponseDto> AddBookAsync(BookDto bookDto)
         {
@@ -96,8 +102,7 @@ namespace BookManagementAPI.Services
                     Author = bookDto.Author,
                     Publication = bookDto.Publication,
                 };
-
-                var addedBook = _bookRepository.AddBook(book);
+                var addedBook = await _bookRepository.AddBook(book);
 
                 if (addedBook == null)
                 {
@@ -108,7 +113,7 @@ namespace BookManagementAPI.Services
             }
             catch (Exception ex)
             {
-                return new ResponseDto(false, $"Failed to add book: {ex.Message}");
+                return new ResponseDto(false, ex.Message);
             }
         }
         public async Task<ResponseDto> SetAdminAndChangeRoleAsync(string username, string newRole)
