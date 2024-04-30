@@ -8,6 +8,7 @@ namespace BookManagementAPI
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Genre> Genres { get; set; }
         public virtual DbSet<Book> Books { get; set; }
+        public virtual DbSet<Admin> Admins { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
 
