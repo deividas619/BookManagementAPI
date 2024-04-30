@@ -30,6 +30,8 @@ namespace BookManagementAPI
             builder.Services.AddScoped<IBookRepository, BookRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+            builder.Services.AddScoped<IAdminService, AdminServices>();
             builder.Services.AddTransient<IJwtService, JwtService>();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
