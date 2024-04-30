@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BookManagementAPI.Models
+﻿namespace BookManagementAPI.Models
 {
     public class Genre : CommonProperties
     {

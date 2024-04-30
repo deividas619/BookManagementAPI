@@ -21,15 +21,27 @@
 //            _bookRepository = new BookRepository(_mockContext.Object);
 //        }
 
-//        [Fact]
-//        public async Task GetAllBooks_ReturnsListOfBooks_WhenBooksExist()
-//        {
-//            // Arrange
-//            var books = new List<Book>
-//            {
-//                new Book { Id = Guid.NewGuid(), Author = "author1", Title = "book1", Publication = new DateOnly(2024, 1, 1), Genre = new Genre() },
-//                new Book { Id = Guid.NewGuid(), Author = "author2", Title = "book2", Publication = new DateOnly(2024, 1, 1), Genre = new Genre() }
-//            };
+        private void SetupMockDbSet(IEnumerable<Book> books)
+        {
+            _mockDbSet.As<IQueryable<Book>>().Setup(m => m.Provider).Returns(books.AsQueryable().Provider);
+            _mockDbSet.As<IQueryable<Book>>().Setup(m => m.Expression).Returns(books.AsQueryable().Expression);
+            _mockDbSet.As<IQueryable<Book>>().Setup(m => m.ElementType).Returns(books.AsQueryable().ElementType);
+            _mockDbSet.As<IQueryable<Book>>().Setup(m => m.GetEnumerator()).Returns(books.AsQueryable().GetEnumerator());
+
+            _mockDbSet.As<IAsyncEnumerable<Book>>()
+                .Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
+                .Returns(books.ToAsyncEnumerable().GetAsyncEnumerator());
+        }
+
+        [Fact]
+        public async Task GetAllBooks_ReturnsListOfBooks_WhenBooksExist()
+        {
+            // Arrange
+            var books = new List<Book>
+            {
+                new Book { Id = Guid.NewGuid(), Author = "author1", Title = "book1", Publication = new DateOnly(2024, 1, 1), Genre = new Genre() },
+                new Book { Id = Guid.NewGuid(), Author = "author2", Title = "book2", Publication = new DateOnly(2024, 1, 1), Genre = new Genre() }
+            };
 
 //            _mockDbSet = new Mock<DbSet<Book>>();
 //            SetupMockDbSet(books);
@@ -53,86 +65,32 @@
 //            await Assert.ThrowsAsync<Exception>(() => _bookRepository.GetAllBooks());
 //        }
 
-//        /*[Fact]
-//        public async Task GetBooksByTitle_ReturnsListOfBooks_WhenBooksExist()
-//        {
-//            // Arrange
-//            var books = new List<Book> { new Book(), new Book() };
-//            var mockDbSet = books.AsQueryable().BuildMockDbSet();
-//            _mockContext.Setup(c => c.Books).Returns(mockDbSet.Object);
-
-//            // Act
-//            var result = await _bookRepository.GetBooksByTitle("Title");
-
-//            // Assert
-//            Assert.Equal(2, result.Count());
-//        }*/
-
-//        [Fact]
-//        public async Task GetBooksByTitle_ThrowsException_WhenFailedToGetBooks()
-//        {
-//            // Arrange
-//            _mockContext.Setup(c => c.Books).Throws(new Exception());
-
-//            // Act & Assert
-//            await Assert.ThrowsAsync<Exception>(() => _bookRepository.GetBooksByTitle("Title"));
-//        }
-
-//        /*[Fact]
-//        public async Task GetBookById_ReturnsBook_WhenBookExists()
-//        {
-//            // Arrange
-//            var book = new Book();
-//            _mockContext.Setup(c => c.Books.FindAsync(It.IsAny<Guid>())).ReturnsAsync(book);
-
-//            // Act
-//            var result = await _bookRepository.GetBookById(Guid.NewGuid());
-
-//            // Assert
-//            Assert.Equal(book, result);
-//        }*/
-
-//        [Fact]
-//        public async Task GetBookById_ThrowsException_WhenFailedToGetBook()
-//        {
-//            // Arrange
-//            _mockContext.Setup(c => c.Books).Throws(new Exception());
+        [Fact]
+        public async Task GetBookById_ThrowsException_WhenFailedToGetBook()
+        {
+            // Arrange
+            _mockContext.Setup(c => c.Books).Throws(new Exception());
 
 //            // Act & Assert
 //            await Assert.ThrowsAsync<Exception>(() => _bookRepository.GetBookById(Guid.NewGuid()));
 //        }
 
-//        /*[Fact]
-//        public async Task AddBook_ReturnsBook_WhenAdditionIsSuccessful()
-//        {
-//            // Arrange
-//            var book = new Book();
-//            var entityEntry = new FakeEntityEntry<Book>(book);
-//            _mockContext.Setup(c => c.Books.AddAsync(It.IsAny<Book>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ValueTask<EntityEntry<Book>>(entityEntry));
+        [Fact]
+        public async Task AddBook_ThrowsException_WhenAdditionFails()
+        {
+            // Arrange
+            _mockContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ThrowsAsync(new Exception());
 
-//            // Act
-//            var result = await _bookRepository.AddBook(book);
+            // Act & Assert
+            await Assert.ThrowsAsync<NullReferenceException>(() => _bookRepository.AddBook(new Book()));
+        }
 
-//            // Assert
-//            Assert.Equal(book, result);
-//        }*/
-
-//        /*[Fact]
-//        public async Task AddBook_ThrowsException_WhenAdditionFails()
-//        {
-//            // Arrange
-//            _mockContext.Setup(c => c.Books.AddAsync(It.IsAny<Book>(), It.IsAny<CancellationToken>())).Throws(new Exception());
-
-//            // Act & Assert
-//            await Assert.ThrowsAsync<Exception>(() => _bookRepository.AddBook(new Book()));
-//        }*/
-
-//        /*[Fact]
-//        public async Task UpdateBook_ReturnsBook_WhenUpdateIsSuccessful()
-//        {
-//            // Arrange
-//            var book = new Book { Id = Guid.NewGuid(), Author = "author2", Title = "book2", Publication = new DateOnly(2024, 1, 1), Genre = new Genre() };
-//            _mockContext.Setup(c => c.Books.Update(book)).Returns((EntityEntry<Book>)null);
+        [Fact]
+        public async Task UpdateBook_ReturnsBook_WhenUpdateIsSuccessful()
+        {
+            // Arrange
+            var book = new Book { Id = Guid.NewGuid(), Author = "author2", Title = "book2", Publication = new DateOnly(2024, 1, 1), Genre = new Genre() };
+            _mockContext.Setup(c => c.Books.Update(book)).Returns((EntityEntry<Book>)null);
 
 //            // Act
 //            var result = await _bookRepository.UpdateBook(book);
@@ -143,19 +101,9 @@
 //            Debug.WriteLine("Actual Book:");
 //            Debug.WriteLine(JsonConvert.SerializeObject(result));
 
-//            // Assert
-//            Assert.Equal(book, result);
-//        }*/
-
-//        /*[Fact]
-//        public async Task UpdateBook_ThrowsException_WhenUpdateFails()
-//        {
-//            // Arrange
-//            _mockContext.Setup(c => c.Books.Update(It.IsAny<Book>())).Throws(new Exception());
-
-//            // Act & Assert
-//            await Assert.ThrowsAsync<Exception>(() => _bookRepository.UpdateBook(new Book()));
-//        }*/
+            // Assert
+            Assert.Equal(book, result);
+        }
 
 //        [Fact]
 //        public async Task RemoveBookById_ReturnsBook_WhenRemovalIsSuccessful()
@@ -177,21 +125,8 @@
 //            // Arrange
 //            _mockContext.Setup(c => c.Books.FindAsync(It.IsAny<Guid>())).Throws(new Exception());
 
-//            // Act & Assert
-//            await Assert.ThrowsAsync<Exception>(() => _bookRepository.RemoveBookById(Guid.NewGuid()));
-//        }
-
-
-//        private void SetupMockDbSet(IEnumerable<Book> books)
-//        {
-//            _mockDbSet.As<IQueryable<Book>>().Setup(m => m.Provider).Returns(books.AsQueryable().Provider);
-//            _mockDbSet.As<IQueryable<Book>>().Setup(m => m.Expression).Returns(books.AsQueryable().Expression);
-//            _mockDbSet.As<IQueryable<Book>>().Setup(m => m.ElementType).Returns(books.AsQueryable().ElementType);
-//            _mockDbSet.As<IQueryable<Book>>().Setup(m => m.GetEnumerator()).Returns(books.AsQueryable().GetEnumerator());
-
-//            _mockDbSet.As<IAsyncEnumerable<Book>>()
-//                .Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
-//                .Returns(books.ToAsyncEnumerable().GetAsyncEnumerator());
-//        }
-//    }
-//}
+            // Act & Assert
+            await Assert.ThrowsAsync<Exception>(() => _bookRepository.RemoveBookById(Guid.NewGuid()));
+        }
+    }
+}

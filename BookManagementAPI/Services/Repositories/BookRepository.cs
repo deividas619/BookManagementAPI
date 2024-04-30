@@ -43,7 +43,7 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
             if (!string.IsNullOrWhiteSpace(filter.Author))
                 result = result.Where(b => b.Author.ToLower().Contains(filter.Author.ToLower()));
 
-            if (filter.Genres is { Length: > 0 })
+            if (filter.Genres is { Length:  > 0})
                 result = result.Where(b => filter.Genres.Contains(b.Genre.Name));
 
             if (filter.PublicationAfterDate != null)
@@ -123,21 +123,12 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
 
         try
         {
-            var newBook = new Book
-            {
-                Id = currentBook.Id,
-                Author = currentBook.Author,
-                Title = currentBook.Title,
-                Publication = currentBook.Publication,
-                Genre = currentBook.Genre,
-                CreatedByUserId = currentBook.CreatedByUserId
-            };
-            context.Update(newBook);
+            context.Update(currentBook);
             await context.SaveChangesAsync();
 
             Log.Information($"[{nameof(UpdateBook)}]: Updated book with id: {currentBook.Id}!");
 
-            return newBook;
+            return currentBook;
         }
         catch (Exception e)
         {

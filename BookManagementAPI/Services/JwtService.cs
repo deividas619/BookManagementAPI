@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using BookManagementAPI.Models;
 
 namespace BookManagementAPI.Services
 {
@@ -16,12 +17,13 @@ namespace BookManagementAPI.Services
             _configuration = configuration;
         }
 
-        public string GetJwtToken(string username, string role)
+        public string GetJwtToken(string username, UserRole role) //Augustas string to UserRole
         {
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Role, role)
+                //new Claim(ClaimTypes.Role, role) //Augustas: commented due to user roles enum
+                new Claim(ClaimTypes.Role, role.ToString()) //Augustas: user roles enum
             };
 
             var secretToken = _configuration.GetSection("Jwt:Key").Value;

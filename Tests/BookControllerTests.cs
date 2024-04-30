@@ -1,187 +1,249 @@
-//using Microsoft.AspNetCore.Mvc;
-//using Moq;
-//using BookManagementAPI.Controllers;
-//using BookManagementAPI.DTOs;
-//using BookManagementAPI.Models;
-//using BookManagementAPI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using BookManagementAPI.Controllers;
+using BookManagementAPI.DTOs;
+using BookManagementAPI.Models;
+using BookManagementAPI.Services;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
-//namespace Tests
-//{
-//    public class BookControllerTests
-//    {
-//        private readonly Mock<IBookService> _mockBookService;
-//        private readonly BookController _controller;
+namespace Tests
+{
+    public class BookControllerTests
+    {
+        private readonly Mock<IBookService> _mockBookService;
+        private readonly BookController _bookController;
 
-//        public BookControllerTests()
-//        {
-//            _mockBookService = new Mock<IBookService>();
-//            _controller = new BookController(_mockBookService.Object);
-//        }
+        public BookControllerTests()
+        {
+            _mockBookService = new Mock<IBookService>();
+            _bookController = new BookController(_mockBookService.Object);
 
-//        [Fact]
-//        public async Task GetAllBooks_ReturnsOkResult_WithAListOfBooks()
-//        {
-//            // Arrange
-//            var books = new List<Book> { new Book(), new Book() };
-//            _mockBookService.Setup(s => s.GetAllBooks()).ReturnsAsync(books);
+            var httpContext = new DefaultHttpContext();
+            httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, "RegularUser"),
+                new Claim(ClaimTypes.Role, "Regular")
+            }));
+            _bookController.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+        }
 
-//            // Act
-//            var result = await _controller.GetAllBooks();
+        [Fact]
+        public async Task GetAllBooks_ReturnsOk_WhenBooksExist()
+        {
+            // Arrange
+            var mockBooks = new List<Book> { new Book { Id = Guid.NewGuid(), Title = "Book 1" } };
+            _mockBookService.Setup(service => service.GetAllBooks()).ReturnsAsync(mockBooks);
 
-//            // Assert
-//            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-//            var returnBooks = Assert.IsType<List<Book>>(okResult.Value);
-//            Assert.Equal(2, returnBooks.Count);
-//        }
+            // Act
+            var result = await _bookController.GetAllBooks();
 
-//        [Fact]
-//        public async Task GetBookByTitle_ReturnsOkResult_WithAListOfBooks_WhenBooksExist()
-//        {
-//            // Arrange
-//            var books = new List<Book> { new Book(), new Book() };
-//            _mockBookService.Setup(s => s.GetBooksByTitle(It.IsAny<string>())).ReturnsAsync(books);
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var books = Assert.IsAssignableFrom<IEnumerable<Book>>(okResult.Value);
+            Assert.Single(books);
+        }
 
-//            // Act
-//            var result = await _controller.GetBookByTitle("Test");
+        [Fact]
+        public async Task GetAllBooks_ReturnsBadRequest_WhenNoBooksExist()
+        {
+            // Arrange
+            _mockBookService.Setup(service => service.GetAllBooks()).ReturnsAsync(new List<Book>());
 
-//            // Assert
-//            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-//            var returnBooks = Assert.IsType<List<Book>>(okResult.Value);
-//            Assert.Equal(2, returnBooks.Count);
-//        }
+            // Act
+            var result = await _bookController.GetAllBooks();
 
-//        [Fact]
-//        public async Task GetBookByTitle_ReturnsBadRequest_WhenNoBooksExist()
-//        {
-//            // Arrange
-//            _mockBookService.Setup(s => s.GetBooksByTitle(It.IsAny<string>())).ReturnsAsync(new List<Book>());
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Equal("There are no books in the database!", badRequestResult.Value);
+        }
 
-//            // Act
-//            var result = await _controller.GetBookByTitle("Test");
+        [Fact]
+        public async Task GetBooksByFilter_ReturnsOk_WhenBooksExist()
+        {
+            // Arrange
+            var mockBooks = new List<Book> { new Book { Id = Guid.NewGuid(), Title = "Book 1" } };
+            _mockBookService.Setup(service => service.GetBooksByFilter(It.IsAny<SearchFilterDto>(), 0, 0)).ReturnsAsync(mockBooks);
 
-//            // Assert
-//            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-//            Assert.Equal("There are no books matching the title!", badRequestResult.Value);
-//        }
+            // Act
+            var result = await _bookController.GetBooksByFilter("Title", "Author", new string[] { "Genre" }, new DateOnly(), new DateOnly());
 
-//        [Fact]
-//        public async Task GetBookById_ReturnsOkResult_WithBook_WhenBookExists()
-//        {
-//            // Arrange
-//            var book = new Book();
-//            _mockBookService.Setup(s => s.GetBookById(It.IsAny<Guid>())).ReturnsAsync(book);
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var books = Assert.IsAssignableFrom<IEnumerable<Book>>(okResult.Value);
+            Assert.Single(books);
+        }
 
-//            // Act
-//            var result = await _controller.GetBookById(Guid.NewGuid());
+        [Fact]
+        public async Task GetBooksByFilter_ReturnsOk_WhenNoBooksExist()
+        {
+            // Arrange
+            _mockBookService.Setup(service => service.GetBooksByFilter(It.IsAny<SearchFilterDto>(), 0, 0))
+                .ReturnsAsync(new List<Book>());
 
-//            // Assert
-//            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-//            var returnBook = Assert.IsType<Book>(okResult.Value);
-//            Assert.Equal(book, returnBook);
-//        }
+            // Act
+            var result = await _bookController.GetBooksByFilter(null, null, null, null, null);
 
-//        [Fact]
-//        public async Task GetBookById_ReturnsBadRequest_WhenBookDoesNotExist()
-//        {
-//            // Arrange
-//            _mockBookService.Setup(s => s.GetBookById(It.IsAny<Guid>())).ReturnsAsync((Book)null);
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            Assert.Empty((IEnumerable<Book>)okResult.Value);
+        }
 
-//            // Act
-//            var result = await _controller.GetBookById(Guid.NewGuid());
+        [Fact]
+        public async Task AddBook_ReturnsOk_WhenBookAddedSuccessfully()
+        {
+            // Arrange
+            var bookDto = new BookDto { Title = "New Book", Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
+            _mockBookService.Setup(service => service.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<GenreDto>(), It.IsAny<string>()))
+                .ReturnsAsync(new Book { Id = Guid.NewGuid(), Title = "New Book" });
 
-//            // Assert
-//            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-//            Assert.Equal("There are no books matching the id!", badRequestResult.Value);
-//        }
+            // Act
+            var result = await _bookController.AddBook(bookDto);
 
-//        /*[Fact]
-//        public async Task AddBook_ReturnsOkResult_WithBook_WhenAdditionIsSuccessful()
-//        {
-//            // Arrange
-//            var book = new Book();
-//            _mockBookService.Setup(s => s.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<GenreDto>())).ReturnsAsync(book);
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var addedBook = Assert.IsType<Book>(okResult.Value);
+            Assert.Equal("New Book", addedBook.Title);
+        }
 
-//            // Act
-//            var result = await _controller.AddBook(new BookDto());
+        [Fact]
+        public async Task AddBook_ReturnsBadRequest_WhenAddingBookFails()
+        {
+            // Arrange
+            var bookDto = new BookDto { Title = "New Book", Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
+            _mockBookService.Setup(service => service.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<GenreDto>(), It.IsAny<string>()))
+                .ReturnsAsync((Book)null);
 
-//            // Assert
-//            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-//            var returnBook = Assert.IsType<Book>(okResult.Value);
-//            Assert.Equal(book, returnBook);
-//        }*/
+            // Act
+            var result = await _bookController.AddBook(bookDto);
 
-//        /*[Fact]
-//        public async Task AddBook_ReturnsBadRequest_WhenAdditionFails()
-//        {
-//            // Arrange
-//            _mockBookService.Setup(s => s.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<GenreDto>())).ReturnsAsync((Book)null);
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Equal("Failed to add a book!", badRequestResult.Value);
+        }
 
-//            // Act
-//            var result = await _controller.AddBook(new BookDto());
+        [Fact]
+        public async Task AddBook_ReturnsBadRequest_WhenTitleIsNull()
+        {
+            // Arrange
+            var bookDto = new BookDto { Title = null, Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
 
-//            // Assert
-//            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-//            Assert.Equal("Failed to add a book!", badRequestResult.Value);
-//        }*/
+            // Act
+            var result = await _bookController.AddBook(bookDto);
 
-//        /*[Fact]
-//        public async Task UpdateBook_ReturnsOkResult_WithBook_WhenUpdateIsSuccessful()
-//        {
-//            // Arrange
-//            var book = new Book();
-//            _mockBookService.Setup(s => s.UpdateBook(It.IsAny<Book>())).ReturnsAsync(book);
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Equal("Failed to add a book!", badRequestResult.Value);
+        }
 
-//            // Act
-//            var result = await _controller.UpdateBook(new Book());
+        [Fact]
+        public async Task AddBook_ReturnsForbidden_WhenUserIsNotAdmin()
+        {
+            // Arrange
+            var bookDto = new BookDto { Title = "New Book", Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
 
-//            // Assert
-//            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-//            var returnBook = Assert.IsType<Book>(okResult.Value);
-//            Assert.Equal(book, returnBook);
-//        }*/
+            // Act
+            var result = await _bookController.AddBook(bookDto);
 
-//        /*[Fact]
-//        public async Task UpdateBook_ReturnsBadRequest_WhenUpdateFails()
-//        {
-//            // Arrange
-//            _mockBookService.Setup(s => s.UpdateBook(It.IsAny<Book>())).ReturnsAsync((Book)null);
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result.Result);
+        }
 
-//            // Act
-//            var result = await _controller.UpdateBook(new Book());
+        [Fact]
+        public async Task UpdateBook_ReturnsOk_WhenBookUpdatedSuccessfully()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var bookDto = new BookDto { Title = "Updated Book", Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
+            var currentBook = new Book { Id = bookId, Title = "Existing Book" };
+            _mockBookService.Setup(service => service.UpdateBook(It.IsAny<Guid>(), It.IsAny<BookDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new Book { Id = bookId, Title = "Updated Book" });
 
-//            // Assert
-//            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-//            Assert.Equal("Failed to update a book!", badRequestResult.Value);
-//        }*/
+            // Act
+            var result = await _bookController.UpdateBook(bookId, bookDto);
 
-//        [Fact]
-//        public async Task RemoveBookById_ReturnsOkResult_WithBook_WhenRemovalIsSuccessful()
-//        {
-//            // Arrange
-//            var book = new Book();
-//            _mockBookService.Setup(s => s.RemoveBookById(It.IsAny<Guid>())).ReturnsAsync(book);
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var updatedBook = Assert.IsType<Book>(okResult.Value);
+            Assert.Equal("Updated Book", updatedBook.Title);
+        }
 
-//            // Act
-//            var result = await _controller.RemoveBookById(Guid.NewGuid());
+        [Fact]
+        public async Task UpdateBook_ReturnsForbidden_WhenUserIsNotAdminOrCreator()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var bookDto = new BookDto { Title = "Updated Book", Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
 
-//            // Assert
-//            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-//            var returnBook = Assert.IsType<Book>(okResult.Value);
-//            Assert.Equal(book, returnBook);
-//        }
+            // Act
+            var result = await _bookController.UpdateBook(bookId, bookDto);
 
-//        [Fact]
-//        public async Task RemoveBookById_ReturnsBadRequest_WhenRemovalFails()
-//        {
-//            // Arrange
-//            _mockBookService.Setup(s => s.RemoveBookById(It.IsAny<Guid>())).ReturnsAsync((Book)null);
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result.Result);
+        }
 
-//            // Act
-//            var result = await _controller.RemoveBookById(Guid.NewGuid());
+        [Fact]
+        public async Task RemoveBookById_ReturnsOk_WhenBookRemovedSuccessfully()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var bookToRemove = new Book { Id = bookId, Title = "Book to Remove" };
+            _mockBookService.Setup(service => service.RemoveBookById(It.IsAny<Guid>()))
+                .ReturnsAsync(bookToRemove);
 
-//            // Assert
-//            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-//            Assert.Equal("Failed to delete a book!", badRequestResult.Value);
-//        }
-//    }
-//}
+            // Act
+            var result = await _bookController.RemoveBookById(bookId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var removedBook = Assert.IsType<Book>(okResult.Value);
+            Assert.Equal("Book to Remove", removedBook.Title);
+        }
+
+        [Fact]
+        public async Task RemoveBookById_ReturnsBadRequest_WhenBookNotFound()
+        {
+            // Arrange
+            var nonExistingBookId = Guid.NewGuid();
+            _mockBookService.Setup(service => service.RemoveBookById(It.IsAny<Guid>()))
+                .ReturnsAsync((Book)null);
+
+            // Act
+            var result = await _bookController.RemoveBookById(nonExistingBookId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Equal($"Failed to delete a book!", badRequestResult.Value);
+        }
+
+        [Fact]
+        public async Task RemoveBookById_ReturnsBadRequest_WhenUserIsNotLoggedIn()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            _bookController.ControllerContext.HttpContext.User = null;
+
+            // Act
+            var result = await _bookController.RemoveBookById(bookId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task RemoveBookById_ReturnsForbidden_WhenUserIsNotAdminOrCreator()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+
+            // Act
+            var result = await _bookController.RemoveBookById(bookId);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result.Result);
+        }
+    }
+}

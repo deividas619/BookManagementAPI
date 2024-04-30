@@ -1,5 +1,7 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using BookManagementAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookManagementAPI.Services.Repositories
 {
@@ -35,9 +37,15 @@ namespace BookManagementAPI.Services.Repositories
             return _context.Users.Count();
         }
 
-        public int GetRoleCount(string role)
+        public int GetRoleCount(UserRole role) //Augustas: string changed to UserRole
         {
             return _context.Users.Count(u => u.Role == role);
+        }
+
+        public async Task<User> GetUserAsync(string username)
+        {
+            var result = await _context.Users.SingleOrDefaultAsync(x => x.Username == username);
+            return result;
         }
     }
 }

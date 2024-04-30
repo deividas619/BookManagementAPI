@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using BookManagementAPI.Models;
+using System.Text.Json.Serialization;
 
 namespace BookManagementAPI.DTOs
 {
@@ -6,8 +7,9 @@ namespace BookManagementAPI.DTOs
     {
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))] //Augustas: Ensures the enum is serialized as a string
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public string Role { get; set; }
+        public UserRole? Role { get; set; } //Augustas: string to UserRole?
 
         public ResponseDto(bool isSuccess)
         {
@@ -18,7 +20,7 @@ namespace BookManagementAPI.DTOs
             IsSuccess = isSuccess;
             Message = message;
         }
-        public ResponseDto(bool isSuccess, string message, string role)
+        public ResponseDto(bool isSuccess, string message, UserRole role) //Augustas: string to UserRole
         {
             IsSuccess = isSuccess;
             Message = message;

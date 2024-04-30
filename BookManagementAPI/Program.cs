@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using BookManagementAPI.Services;
 using BookManagementAPI.Services.Repositories;
 using Serilog;
+using System.Linq;
 
 namespace BookManagementAPI
 {
@@ -30,6 +31,8 @@ namespace BookManagementAPI
             builder.Services.AddScoped<IBookRepository, BookRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+            builder.Services.AddScoped<IAdminService, AdminServices>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             builder.Services.AddTransient<IJwtService, JwtService>();
@@ -82,6 +85,16 @@ namespace BookManagementAPI
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+            }
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+                var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
+                if (!db.Users.Any(u => u.Username == "admin"))
+                {
+                    userService.Signup("admin", "admin");
+                }
             }
 
             app.UseHttpsRedirection();

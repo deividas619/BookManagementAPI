@@ -1,4 +1,5 @@
 ﻿using BookManagementAPI.DTOs;
+using BookManagementAPI.Models;
 using BookManagementAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,16 @@ public class UserController(IUserService userService, IJwtService jwtService) : 
         var response = userService.Login(username, password);
         if (!response.IsSuccess)
             return BadRequest(response.Message);
-        return Ok(jwtService.GetJwtToken(username, response.Role));
+
+        //Augustas: if added (1)
+        if (response.Role.HasValue)
+        {
+            var token = jwtService.GetJwtToken(username, response.Role.Value);
+            return Ok(new { Token = token });
+        }
+
+        //return Ok(jwtService.GetJwtToken(username, response.Role)); //Augustas commented due to 1 and 2
+        return BadRequest("Role information is missing or invalid."); //Augustas return added (2)
     }
 
     [HttpPost("Signup")]
@@ -41,8 +51,10 @@ public class UserController(IUserService userService, IJwtService jwtService) : 
     }
 
     [HttpPost("ChangeRole")]
-    [Authorize(Roles = "Admin")]
-    public ActionResult<ResponseDto> ChangeRole(string username, string newRole)
+    //[Authorize(Roles = "Admin")] //Augustas: comented due to user roles enum
+    [Authorize(Roles = nameof(UserRole.Admin))] //Augustas: user roles enum
+
+    public ActionResult<ResponseDto> ChangeRole(string username, UserRole newRole) //Augustas string to UserRole
     {
         var response = userService.ChangeRole(username, newRole);
         if (!response.IsSuccess)

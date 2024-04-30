@@ -1,4 +1,5 @@
 ﻿using BookManagementAPI.Models;
+using System.Threading.Tasks;
 
 namespace BookManagementAPI.Services.Repositories
 {
@@ -8,6 +9,7 @@ namespace BookManagementAPI.Services.Repositories
         void SaveNewUser(User user);
         void SaveChangedUser(User user);
         public int GetUserCount();
-        public int GetRoleCount(string role);
+        public int GetRoleCount(UserRole role);
+        Task<User> GetUserAsync(string username);
     }
 }
