@@ -37,7 +37,7 @@ namespace BookManagementAPI.Services.Repositories
             return _context.Users.Count();
         }
 
-        public int GetRoleCount(string role)
+        public int GetRoleCount(UserRole role) //Augustas: string changed to UserRole
         {
             return _context.Users.Count(u => u.Role == role);
         }
