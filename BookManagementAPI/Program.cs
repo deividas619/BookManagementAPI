@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using BookManagementAPI.Services;
 using BookManagementAPI.Services.Repositories;
 using Serilog;
+using System.Linq;
 
 namespace BookManagementAPI
 {
@@ -80,6 +81,16 @@ namespace BookManagementAPI
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+            }
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+                var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
+                if (!db.Users.Any(u => u.Username == "admin"))
+                {
+                    userService.Signup("admin", "admin");
+                }
             }
 
             app.UseHttpsRedirection();

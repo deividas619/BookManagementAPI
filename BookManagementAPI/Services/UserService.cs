@@ -87,7 +87,7 @@ namespace BookManagementAPI.Services
                 Role = "Regular"
             };
 
-            if (_userRepository.GetUserCount() == 0)
+            if (string.Equals(username, "admin", StringComparison.OrdinalIgnoreCase))
             {
                 user.Role = "Admin";
             }
