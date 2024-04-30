@@ -9,7 +9,7 @@ namespace BookManagementAPI.Services.Repositories
     public interface IBookRepository
     {
         Task<IEnumerable<Book>> GetAllBooks();
-        Task<IEnumerable<Book>> GetBooksByTitle(string title);
+        Task<IEnumerable<Book>> GetBooksByFilter(SearchFilterDto filter, int skip, int take);
         Task<Book> GetBookById(Guid id);
         Task<Book> AddBook(Book book);
         Task<Book> UpdateBook(Book currentBook);

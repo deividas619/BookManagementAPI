@@ -87,7 +87,7 @@ namespace BookManagementAPI.Services
                 Role = UserRole.Regular //Augustas: "Regular" changed to UserRole.Regular
             };
 
-            if (_userRepository.GetUserCount() == 0)
+            if (string.Equals(username, "admin", StringComparison.OrdinalIgnoreCase))
             {
                 user.Role = UserRole.Admin; //Augustas: "Admin" changed to UserRole.Admin
             }

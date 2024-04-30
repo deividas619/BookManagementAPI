@@ -28,19 +28,52 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
         }
     }
 
-    public async Task<IEnumerable<Book>> GetBooksByTitle(string title)
+    public async Task<IEnumerable<Book>> GetBooksByFilter(SearchFilterDto filter, int skip, int take)
     {
         try
         {
-            var output = await context.Books.Include(g => g.Genre).Where(b => b.Title == title).ToListAsync();
+            if (take <= 0)
+                take = context.Books.Count();
 
-            Log.Information($"[{nameof(GetBookById)}]: Returned books by title: {title}!");
+            var result = context.Books.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filter.Title))
+                result = result.Where(b => b.Title.ToLower().Contains(filter.Title.ToLower()));
+
+            if (!string.IsNullOrWhiteSpace(filter.Author))
+                result = result.Where(b => b.Author.ToLower().Contains(filter.Author.ToLower()));
+
+            if (filter.Genres is { Length:  > 0})
+                result = result.Where(b => filter.Genres.Contains(b.Genre.Name));
+
+            if (filter.PublicationAfterDate != null)
+                result = result.Where(b => b.Publication >= filter.PublicationAfterDate);
+
+            if (filter.PublicationBeforeDate != null)
+                result = result.Where(b => b.Publication <= filter.PublicationBeforeDate);
+
+            result = result.Distinct()
+                .OrderBy(b => b.Author)
+                .ThenBy(b => b.Title)
+                .Skip(skip)
+                .Take(take);
+
+            Log.Information($"[{nameof(GetBooksByFilter)}]: Returned books by filter:\n" +
+                            $"Title -> '{filter.Title}';\n" +
+                            $"Author -> '{filter.Author}';\n" +
+                            $"Genres -> '{filter.Genres}';\n" +
+                            $"PublicationFromDate -> '{filter.PublicationAfterDate}';\n" +
+                            $"PublicationToDate -> '{filter.PublicationBeforeDate}';\n" +
+                            $"Skip -> '{skip}';\n" +
+                            $"Take -> '{take}'!");
+
+            var output = await result.ToListAsync();
 
             return output;
         }
         catch (Exception e)
         {
-            Log.Error($"[{nameof(GetBooksByTitle)}]: {e.Message}");
+            Log.Error($"[{nameof(GetBooksByFilter)}]: {e.Message}");
             throw;
         }
     }
@@ -82,7 +115,7 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
 
     public async Task<Book> UpdateBook(Book currentBook)
     {
-        if (currentBook is null)
+        if (currentBook.Id == default(Guid))
         {
             Log.Error($"[{nameof(UpdateBook)}]: Could not find the book in the database by id: {currentBook.Id}!");
             return currentBook;
@@ -90,21 +123,12 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
 
         try
         {
-            var newBook = new Book
-            {
-                Id = currentBook.Id,
-                Author = currentBook.Author,
-                Title = currentBook.Title,
-                Publication = currentBook.Publication,
-                Genre = currentBook.Genre,
-                CreatedByUserId = currentBook.CreatedByUserId
-            };
-            context.Update(newBook);
+            context.Update(currentBook);
             await context.SaveChangesAsync();
 
             Log.Information($"[{nameof(UpdateBook)}]: Updated book with id: {currentBook.Id}!");
 
-            return newBook;
+            return currentBook;
         }
         catch (Exception e)
         {

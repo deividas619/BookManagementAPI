@@ -23,28 +23,15 @@ public class BookService(IBookRepository repository) : IBookService
         }
     }
 
-    public async Task<IEnumerable<Book>> GetBooksByTitle(string title)
+    public async Task<IEnumerable<Book>> GetBooksByFilter(SearchFilterDto searchFilter, int skip, int take)
     {
         try
         {
-            return await repository.GetBooksByTitle(title);
+            return await repository.GetBooksByFilter(searchFilter, skip, take);
         }
         catch (Exception e)
         {
-            Log.Error($"[{nameof(GetBooksByTitle)}]: {e.Message}");
-            throw;
-        }
-    }
-
-    public async Task<Book> GetBookById(Guid id)
-    {
-        try
-        {
-            return await repository.GetBookById(id);
-        }
-        catch (Exception e)
-        {
-            Log.Error($"[{nameof(GetBookById)}]: {e.Message}");
+            Log.Error($"[{nameof(GetBooksByFilter)}]: {e.Message}");
             throw;
         }
     }
@@ -84,23 +71,36 @@ public class BookService(IBookRepository repository) : IBookService
         }
     }
 
-    public async Task<Book> UpdateBook(Book currentBook, string userName, string userNameRole)
+    public async Task<Book> UpdateBook(Guid bookId, BookDto currentBookDto, string userName, string userNameRole)
     {
-        if (repository.GetUserId(userName) == currentBook.CreatedByUserId || string.Compare(userNameRole, "Admin", StringComparison.OrdinalIgnoreCase) == 0)
+        var currentBook = await repository.GetBookById(bookId);
+        if (currentBook is not null)
         {
-            try
+            if (repository.GetUserId(userName) == currentBook.CreatedByUserId || string.Compare(userNameRole, "Admin", StringComparison.OrdinalIgnoreCase) == 0)
             {
-                return await repository.UpdateBook(currentBook);
+                try
+                {
+                    currentBook.Title = currentBookDto.Title;
+                    currentBook.Author = currentBookDto.Author;
+                    currentBook.Publication = currentBookDto.Publication;
+                    currentBook.Genre = await GetGenre(currentBookDto.Genre);
+
+                    return await repository.UpdateBook(currentBook);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[{nameof(UpdateBook)}]: {e.Message}");
+                    throw;
+                }
             }
-            catch (Exception e)
+            else
             {
-                Log.Error($"[{nameof(UpdateBook)}]: {e.Message}");
-                throw;
+                return null;
             }
         }
         else
         {
-            return null;
+            return currentBook;
         }
     }
 
