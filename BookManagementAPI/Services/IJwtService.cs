@@ -1,7 +1,9 @@
-﻿namespace BookManagementAPI.Services
+﻿using BookManagementAPI.Models;
+
+namespace BookManagementAPI.Services
 {
     public interface IJwtService
     {
-        public string GetJwtToken(string username, string role);
+        public string GetJwtToken(string username, UserRole role); //Augustas string to UserRole
     }
 }
