@@ -149,13 +149,13 @@ namespace BookManagementAPI.Migrations
 
             modelBuilder.Entity("BookManagementAPI.Models.Review", b =>
                 {
-                    b.HasOne("BookManagementAPI.Models.Book", "book")
+                    b.HasOne("BookManagementAPI.Models.Book", "Book")
                         .WithMany("Reviews")
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("book");
+                    b.Navigation("Book");
                 });
 
             modelBuilder.Entity("BookManagementAPI.Models.Book", b =>

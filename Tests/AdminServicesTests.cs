@@ -284,7 +284,7 @@ namespace Tests
             // Arrange
             var bookDto = new BookDto { Title = "Test Book", Author = "Test Author", Publication = DateOnly.FromDateTime(DateTime.UtcNow) };
             var bookRepositoryMock = new Mock<IBookRepository>();
-            bookRepositoryMock.Setup(repo => repo.AddBook(It.IsAny<Book>())).Returns(Task.FromException<Book>(new Exception("Failed to add book")));
+            bookRepositoryMock.Setup(repo => repo.AddBook(It.IsAny<Book>())).Returns(Task.FromException<Book>(new Exception("Failed to add Book")));
             var adminRepositoryMock = new Mock<IAdminRepository>();
             var userRepositoryMock = new Mock<IUserRepository>();
             var adminService = new AdminServices(adminRepositoryMock.Object, userRepositoryMock.Object, bookRepositoryMock.Object);
@@ -294,7 +294,7 @@ namespace Tests
 
             // Assert
             Assert.False(result.IsSuccess);
-            Assert.Equal("Failed to add book", result.Message);
+            Assert.Equal("Failed to add Book", result.Message);
         }
     }
 }

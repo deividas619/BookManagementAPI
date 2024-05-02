@@ -26,7 +26,7 @@ public class ReviewController(IBookRepository bookRepository, IReviewService rev
         var result = await reviewService.AddReview(bookId, reviewDto, userName);
 
         if (result.Text == "Not found")
-            return BadRequest("No book match was found!");
+            return BadRequest("No Book match was found!");
         return Ok(result);
     }
 
@@ -37,7 +37,7 @@ public class ReviewController(IBookRepository bookRepository, IReviewService rev
         var reviews = await reviewService.GetReviewsByBookId(bookId);
         if (reviews is null)
         {
-            return BadRequest("No book reviews were found!");
+            return BadRequest("No Book reviews were found!");
         }
         return Ok(reviews);
     }

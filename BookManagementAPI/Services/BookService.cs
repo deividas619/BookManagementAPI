@@ -116,13 +116,13 @@ public class BookService(IBookRepository repository) : IBookService
             }
             else
             {
-                Log.Error($"[{nameof(UpdateBook)}]: User is not authorized to edit book with id: {bookId}!");
+                Log.Error($"[{nameof(UpdateBook)}]: User is not authorized to edit Book with id: {bookId}!");
                 return new Book { Title = "Unauthorized" };
             }
         }
         else
         {
-            Log.Error($"[{nameof(UpdateBook)}]: No book match was found with id: {bookId}!");
+            Log.Error($"[{nameof(UpdateBook)}]: No Book match was found with id: {bookId}!");
             return new Book { Title = "Not found" };
         }
     }
@@ -146,13 +146,13 @@ public class BookService(IBookRepository repository) : IBookService
             }
             else
             {
-                Log.Error($"[{nameof(RemoveBookById)}]: User is not authorized to delete book with id: {bookId}!");
+                Log.Error($"[{nameof(RemoveBookById)}]: User is not authorized to delete Book with id: {bookId}!");
                 return new Book { Title = "Unauthorized" };
             }
         }
         else
         {
-            Log.Error($"[{nameof(RemoveBookById)}]: No book match was found with id: {bookId}!");
+            Log.Error($"[{nameof(RemoveBookById)}]: No Book match was found with id: {bookId}!");
             return new Book { Title = "Not found" };
         }
     }

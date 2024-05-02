@@ -28,7 +28,7 @@ public class ReviewService(IBookRepository bookRepository, IReviewRepository rev
             }
             else
             {
-                Log.Error($"[{nameof(AddReview)}]: No book match was found with id: {bookId}!");
+                Log.Error($"[{nameof(AddReview)}]: No Book match was found with id: {bookId}!");
                 return new Review { Text = "Not found" };
             }
         }
@@ -56,7 +56,7 @@ public class ReviewService(IBookRepository bookRepository, IReviewRepository rev
         }
         else
         {
-            Log.Error($"[{nameof(GetReviewsByBookId)}]: No book match was found with id: {bookId}!");
+            Log.Error($"[{nameof(GetReviewsByBookId)}]: No Book match was found with id: {bookId}!");
             return null;
         }
     }

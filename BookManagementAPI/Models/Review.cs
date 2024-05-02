@@ -10,6 +10,6 @@ namespace BookManagementAPI.Models
         public Guid CreatedByUserId { get; set; }
         public Guid BookId { get; set; }    
         [ForeignKey("BookId")]
-        public virtual Book book { get; set; }
+        public virtual Book Book { get; set; }
     }
 }

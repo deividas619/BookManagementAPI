@@ -154,7 +154,7 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
             throw;
         }
 
-        Log.Information($"[{nameof(AddBook)}]: Successfully added book: {book.Id}");
+        Log.Information($"[{nameof(AddBook)}]: Successfully added Book: {book.Id}");
 
         return book;
     }
@@ -172,7 +172,7 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
             throw;
         }
 
-        Log.Information($"[{nameof(UpdateBook)}]: Successfully updated book with id: {currentBook.Id}");
+        Log.Information($"[{nameof(UpdateBook)}]: Successfully updated Book with id: {currentBook.Id}");
 
         return currentBook;
     }
@@ -191,7 +191,7 @@ public class BookRepository(ApplicationDbContext context) : IBookRepository
             throw;
         }
         
-        Log.Information($"[{nameof(RemoveBookById)}]: Successfully removed book with id: {bookId}");
+        Log.Information($"[{nameof(RemoveBookById)}]: Successfully removed Book with id: {bookId}");
 
         return bookToRemove;
     }

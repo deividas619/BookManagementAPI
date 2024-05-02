@@ -40,7 +40,7 @@ public class BookController(IBookService service) : ControllerBase
         var result = await service.GetBooksByFilter(searchFilter, 0, 0);
 
         if (!result.Any())
-            return BadRequest("No book matches were found!");
+            return BadRequest("No Book matches were found!");
         return Ok(result);
     }
 
@@ -51,7 +51,7 @@ public class BookController(IBookService service) : ControllerBase
         var result = await service.GetBookSuggestions(bookId);
 
         if (result is null)
-            return BadRequest("No book matches were found!");
+            return BadRequest("No Book matches were found!");
         return Ok(result);
     }
 
@@ -63,7 +63,7 @@ public class BookController(IBookService service) : ControllerBase
         var result = await service.AddBook(book.Title, book.Author, book.Publication, book.Genre, userName);
 
         if (result is null)
-            return BadRequest("Failed to add a book!");
+            return BadRequest("Failed to add a Book!");
         return Ok(result);
     }
 
@@ -76,9 +76,9 @@ public class BookController(IBookService service) : ControllerBase
         var result = await service.UpdateBook(id, currentBook, userName, userNameRole);
 
         if (result.Title == "Not found")
-            return BadRequest("No book match was found!");
+            return BadRequest("No Book match was found!");
         if (result.Title == "Unauthorized")
-            return Unauthorized("User cannot edit this book!");
+            return Unauthorized("User cannot edit this Book!");
         return Ok(result);
     }
 
@@ -91,9 +91,9 @@ public class BookController(IBookService service) : ControllerBase
         var result = await service.RemoveBookById(id, userName, userNameRole);
 
         if (result.Title == "Not found")
-            return BadRequest("No book match was found!");
+            return BadRequest("No Book match was found!");
         if (result.Title == "Unauthorized")
-            return Unauthorized("User cannot delete this book!");
+            return Unauthorized("User cannot delete this Book!");
         return Ok(result);
     }
 }

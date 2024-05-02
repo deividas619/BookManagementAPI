@@ -60,7 +60,7 @@ namespace Tests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("No book match was found!", badRequestResult.Value);
+            Assert.Equal("No Book match was found!", badRequestResult.Value);
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace Tests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("No book reviews were found!", badRequestResult.Value);
+            Assert.Equal("No Book reviews were found!", badRequestResult.Value);
         }
 
         [Fact]
