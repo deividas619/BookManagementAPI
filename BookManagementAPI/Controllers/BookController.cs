@@ -4,15 +4,15 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using BookManagementAPI.DTOs;
+using BookManagementAPI.Interfaces;
 using BookManagementAPI.Models;
-using BookManagementAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookManagementAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("[controller]/[action]")]
 public class BookController(IBookService service) : ControllerBase
 {
     [HttpGet("GetAllBooks")]
@@ -39,8 +39,19 @@ public class BookController(IBookService service) : ControllerBase
         };
         var result = await service.GetBooksByFilter(searchFilter, 0, 0);
 
+        if (!result.Any())
+            return BadRequest("No book matches were found!");
+        return Ok(result);
+    }
+
+    [HttpPost("GetBookSuggestions")]
+    [AllowAnonymous]
+    public async Task<ActionResult<IEnumerable<Book>>> GetBookSuggestions([FromQuery] Guid bookId)
+    {
+        var result = await service.GetBookSuggestions(bookId);
+
         if (result is null)
-            return BadRequest("There are no books matching the id!");
+            return BadRequest("No book matches were found!");
         return Ok(result);
     }
 
@@ -58,14 +69,16 @@ public class BookController(IBookService service) : ControllerBase
 
     [HttpPut("UpdateBook/{id}")]
     [Authorize(Roles = nameof(UserRole.Admin) + ", " + nameof(UserRole.Regular))]
-    public async Task<ActionResult<Book>> UpdateBook([FromRoute]Guid id, [FromBody] BookDto currentBook)
+    public async Task<ActionResult<Book>> UpdateBook([FromRoute] Guid id, [FromBody] BookDto currentBook)
     {
         var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
         var userNameRole = HttpContext.User.FindFirst(ClaimTypes.Role).Value;
         var result = await service.UpdateBook(id, currentBook, userName, userNameRole);
 
-        if (result is null)
-            return BadRequest("Failed to update a book!");
+        if (result.Title == "Not found")
+            return BadRequest("No book match was found!");
+        if (result.Title == "Unauthorized")
+            return Unauthorized("User cannot edit this book!");
         return Ok(result);
     }
 
@@ -73,10 +86,14 @@ public class BookController(IBookService service) : ControllerBase
     [Authorize(Roles = nameof(UserRole.Admin) + ", " + nameof(UserRole.Regular))]
     public async Task<ActionResult<Book>> RemoveBookById([FromQuery] Guid id)
     {
-        var result = await service.RemoveBookById(id);
+        var userName = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
+        var userNameRole = HttpContext.User.FindFirst(ClaimTypes.Role).Value;
+        var result = await service.RemoveBookById(id, userName, userNameRole);
 
-        if (result is null)
-            return BadRequest("Failed to delete a book!");
+        if (result.Title == "Not found")
+            return BadRequest("No book match was found!");
+        if (result.Title == "Unauthorized")
+            return Unauthorized("User cannot delete this book!");
         return Ok(result);
     }
 }

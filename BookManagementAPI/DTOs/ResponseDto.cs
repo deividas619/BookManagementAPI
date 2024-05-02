@@ -9,7 +9,7 @@ namespace BookManagementAPI.DTOs
         public string Message { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public UserRole? Role { get; set; }
+        public UserRole Role { get; set; }
 
         public ResponseDto(bool isSuccess)
         {

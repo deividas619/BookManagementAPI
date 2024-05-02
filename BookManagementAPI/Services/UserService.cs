@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Security.Cryptography;
 using BookManagementAPI.DTOs;
+using BookManagementAPI.Interfaces;
 using BookManagementAPI.Models;
-using BookManagementAPI.Services.Repositories;
 
 namespace BookManagementAPI.Services
 {
@@ -20,10 +20,10 @@ namespace BookManagementAPI.Services
         {
             var user = _userRepository.GetUser(username);
             if (user is null)
-                return new ResponseDto(false, "Username or password does not match!");
+                return new ResponseDto(false, "Username does not exist!");
 
             if (!VerifyPasswordHash(password, user.Password, user.PasswordSalt))
-                return new ResponseDto(false, "Username or password does not match!");
+                return new ResponseDto(false, "Password is incorrect!");
 
             return new ResponseDto(true, "User logged in!", user.Role);
         }
@@ -67,6 +67,10 @@ namespace BookManagementAPI.Services
                 if (newRole != UserRole.Admin && _userRepository.GetRoleCount(UserRole.Admin) == 1 && user.Role == UserRole.Admin)
                 {
                     return new ResponseDto(false, "There cannot be 0 admins!");
+                }
+                else if (newRole == user.Role)
+                {
+                    return new ResponseDto(false, "User already has that role!");
                 }
                 user.Role = newRole;
                 _userRepository.SaveChangedUser(user);

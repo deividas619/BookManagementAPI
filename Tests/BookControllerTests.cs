@@ -3,9 +3,9 @@ using Moq;
 using BookManagementAPI.Controllers;
 using BookManagementAPI.DTOs;
 using BookManagementAPI.Models;
-using BookManagementAPI.Services;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using BookManagementAPI.Interfaces;
 
 namespace Tests
 {
@@ -78,7 +78,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetBooksByFilter_ReturnsOk_WhenNoBooksExist()
+        public async Task GetBooksByFilter_ReturnsBadRequest_WhenNoBooksExist()
         {
             // Arrange
             _mockBookService.Setup(service => service.GetBooksByFilter(It.IsAny<SearchFilterDto>(), 0, 0))
@@ -88,8 +88,8 @@ namespace Tests
             var result = await _bookController.GetBooksByFilter(null, null, null, null, null);
 
             // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            Assert.Empty((IEnumerable<Book>)okResult.Value);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Equal("No book matches were found!", badRequestResult.Value);
         }
 
         [Fact]
@@ -97,8 +97,7 @@ namespace Tests
         {
             // Arrange
             var bookDto = new BookDto { Title = "New Book", Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
-            _mockBookService.Setup(service => service.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<GenreDto>(), It.IsAny<string>()))
-                .ReturnsAsync(new Book { Id = Guid.NewGuid(), Title = "New Book" });
+            _mockBookService.Setup(service => service.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<GenreDto>(), It.IsAny<string>())).ReturnsAsync(new Book { Id = Guid.NewGuid(), Title = "New Book" });
 
             // Act
             var result = await _bookController.AddBook(bookDto);
@@ -114,8 +113,7 @@ namespace Tests
         {
             // Arrange
             var bookDto = new BookDto { Title = "New Book", Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
-            _mockBookService.Setup(service => service.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<GenreDto>(), It.IsAny<string>()))
-                .ReturnsAsync((Book)null);
+            _mockBookService.Setup(service => service.AddBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<GenreDto>(), It.IsAny<string>())).ReturnsAsync((Book)null);
 
             // Act
             var result = await _bookController.AddBook(bookDto);
@@ -159,8 +157,7 @@ namespace Tests
             var bookId = Guid.NewGuid();
             var bookDto = new BookDto { Title = "Updated Book", Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
             var currentBook = new Book { Id = bookId, Title = "Existing Book" };
-            _mockBookService.Setup(service => service.UpdateBook(It.IsAny<Guid>(), It.IsAny<BookDto>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(new Book { Id = bookId, Title = "Updated Book" });
+            _mockBookService.Setup(service => service.UpdateBook(It.IsAny<Guid>(), It.IsAny<BookDto>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new Book { Id = bookId, Title = "Updated Book" });
 
             // Act
             var result = await _bookController.UpdateBook(bookId, bookDto);
@@ -172,17 +169,21 @@ namespace Tests
         }
 
         [Fact]
-        public async Task UpdateBook_ReturnsForbidden_WhenUserIsNotAdminOrCreator()
+        public async Task UpdateBook_ReturnsUnauthorized_WhenUserCannotEditBook()
         {
             // Arrange
             var bookId = Guid.NewGuid();
             var bookDto = new BookDto { Title = "Updated Book", Author = "Author", Publication = new DateOnly(), Genre = new GenreDto { Name = "Genre" } };
 
+            var unauthorizedBook = new Book { Title = "Unauthorized" };
+            _mockBookService.Setup(service => service.UpdateBook(It.IsAny<Guid>(), It.IsAny<BookDto>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(unauthorizedBook);
+
             // Act
             var result = await _bookController.UpdateBook(bookId, bookDto);
 
             // Assert
-            Assert.IsType<BadRequestObjectResult>(result.Result);
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result.Result);
+            Assert.Equal("User cannot edit this book!", unauthorizedResult.Value);
         }
 
         [Fact]
@@ -191,8 +192,7 @@ namespace Tests
             // Arrange
             var bookId = Guid.NewGuid();
             var bookToRemove = new Book { Id = bookId, Title = "Book to Remove" };
-            _mockBookService.Setup(service => service.RemoveBookById(It.IsAny<Guid>()))
-                .ReturnsAsync(bookToRemove);
+            _mockBookService.Setup(service => service.RemoveBookById(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(bookToRemove);
 
             // Act
             var result = await _bookController.RemoveBookById(bookId);
@@ -208,15 +208,15 @@ namespace Tests
         {
             // Arrange
             var nonExistingBookId = Guid.NewGuid();
-            _mockBookService.Setup(service => service.RemoveBookById(It.IsAny<Guid>()))
-                .ReturnsAsync((Book)null);
+            var notFoundBook = new Book { Title = "Not found" };
+            _mockBookService.Setup(service => service.RemoveBookById(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(notFoundBook);
 
             // Act
             var result = await _bookController.RemoveBookById(nonExistingBookId);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal($"Failed to delete a book!", badRequestResult.Value);
+            Assert.Equal("No book match was found!", badRequestResult.Value);
         }
 
         [Fact]
@@ -224,26 +224,15 @@ namespace Tests
         {
             // Arrange
             var bookId = Guid.NewGuid();
-            _bookController.ControllerContext.HttpContext.User = null;
+            var unauthorizedBook = new Book { Title = "Unauthorized" };
+            _mockBookService.Setup(service => service.RemoveBookById(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(unauthorizedBook);
 
             // Act
             var result = await _bookController.RemoveBookById(bookId);
 
             // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-        }
-
-        [Fact]
-        public async Task RemoveBookById_ReturnsForbidden_WhenUserIsNotAdminOrCreator()
-        {
-            // Arrange
-            var bookId = Guid.NewGuid();
-
-            // Act
-            var result = await _bookController.RemoveBookById(bookId);
-
-            // Assert
-            Assert.IsType<BadRequestObjectResult>(result.Result);
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result.Result);
+            Assert.Equal("User cannot delete this book!", unauthorizedResult.Value);
         }
     }
 }

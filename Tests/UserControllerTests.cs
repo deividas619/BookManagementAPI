@@ -2,7 +2,7 @@
 using Moq;
 using BookManagementAPI.Controllers;
 using BookManagementAPI.DTOs;
-using BookManagementAPI.Services;
+using BookManagementAPI.Interfaces;
 
 namespace Tests
 {

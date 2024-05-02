@@ -1,7 +1,7 @@
 ﻿using BookManagementAPI.DTOs;
 using BookManagementAPI.Models;
 
-namespace BookManagementAPI.Services
+namespace BookManagementAPI.Interfaces
 {
     public interface IUserService
     {

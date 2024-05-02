@@ -1,14 +1,13 @@
-﻿using BookManagementAPI.Models;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using BookManagementAPI.Models;
 
-namespace BookManagementAPI.Services.Repositories
+namespace BookManagementAPI.Interfaces
 {
     public interface IUserRepository
     {
         User GetUser(string username);
         void SaveNewUser(User user);
         void SaveChangedUser(User user);
-        public int GetUserCount();
         public int GetRoleCount(UserRole role);
         Task<User> GetUserAsync(string username);
     }

@@ -1,8 +1,7 @@
-﻿using BookManagementAPI.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using BookManagementAPI.Models;
 
-namespace BookManagementAPI.Services.Repositories
+namespace BookManagementAPI.Interfaces
 {
     public interface IAdminRepository
     {

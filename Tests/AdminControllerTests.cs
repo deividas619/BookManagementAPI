@@ -1,13 +1,8 @@
 ﻿using BookManagementAPI.Controllers;
 using BookManagementAPI.DTOs;
-using BookManagementAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using BookManagementAPI.Interfaces;
 
 namespace Tests
 {

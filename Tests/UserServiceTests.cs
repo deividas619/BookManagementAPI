@@ -1,7 +1,7 @@
 ﻿using Moq;
 using BookManagementAPI.Models;
-using BookManagementAPI.Services.Repositories;
 using BookManagementAPI.Services;
+using BookManagementAPI.Interfaces;
 
 namespace Tests
 {
@@ -58,7 +58,7 @@ namespace Tests
 
             // Assert
             Assert.False(response.IsSuccess);
-            Assert.Equal("Username or password does not match!", response.Message);
+            Assert.Equal("Username does not exist!", response.Message);
         }
 
         [Fact]

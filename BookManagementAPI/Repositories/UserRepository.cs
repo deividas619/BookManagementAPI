@@ -1,9 +1,10 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using BookManagementAPI.Interfaces;
 using BookManagementAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookManagementAPI.Services.Repositories
+namespace BookManagementAPI.Repositories
 {
     public class UserRepository : IUserRepository
     {
@@ -30,11 +31,6 @@ namespace BookManagementAPI.Services.Repositories
         public void SaveChangedUser(User user)
         {
             _context.SaveChanges();
-        }
-
-        public int GetUserCount()
-        {
-            return _context.Users.Count();
         }
 
         public int GetRoleCount(UserRole role)

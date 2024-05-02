@@ -1,10 +1,10 @@
 ﻿using BookManagementAPI.DTOs;
 using BookManagementAPI.Models;
-using BookManagementAPI.Services.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using BookManagementAPI.Interfaces;
 
 namespace BookManagementAPI.Services
 {
