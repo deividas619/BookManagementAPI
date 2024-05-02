@@ -51,6 +51,9 @@ namespace BookManagementAPI.Migrations
                     b.Property<string>("Author")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("AverageRating")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<Guid>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -59,6 +62,9 @@ namespace BookManagementAPI.Migrations
 
                     b.Property<DateOnly>("Publication")
                         .HasColumnType("date");
+
+                    b.Property<int>("SearchedTimes")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
@@ -92,9 +98,6 @@ namespace BookManagementAPI.Migrations
 
                     b.Property<Guid>("BookId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BookTitle")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");

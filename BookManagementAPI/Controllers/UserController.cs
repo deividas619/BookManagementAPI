@@ -1,13 +1,14 @@
 ﻿using BookManagementAPI.DTOs;
 using BookManagementAPI.Models;
-using BookManagementAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using BookManagementAPI.Interfaces;
 
 namespace BookManagementAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("[controller]/[action]")]
 public class UserController(IUserService userService, IJwtService jwtService) : ControllerBase
 {
     [HttpPost("Login")]
@@ -34,9 +35,9 @@ public class UserController(IUserService userService, IJwtService jwtService) : 
 
     [HttpPost("ChangePassword")]
     [Authorize]
-    public ActionResult<ResponseDto> ChangePassword(string username, string oldPassword, string newPassword,
-        string newPasswordAgain)
+    public ActionResult<ResponseDto> ChangePassword(string oldPassword, string newPassword, string newPasswordAgain)
     {
+        var username = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
         var response = userService.ChangePassword(username, oldPassword, newPassword, newPasswordAgain);
         if (!response.IsSuccess)
             return BadRequest(response.Message);
@@ -45,7 +46,6 @@ public class UserController(IUserService userService, IJwtService jwtService) : 
 
     [HttpPost("ChangeRole")]
     [Authorize(Roles = nameof(UserRole.Admin))]
-
     public ActionResult<ResponseDto> ChangeRole(string username, UserRole newRole)
     {
         var response = userService.ChangeRole(username, newRole);

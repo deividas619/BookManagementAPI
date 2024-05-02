@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using BookManagementAPI.Interfaces;
 using BookManagementAPI.Models;
 
 namespace BookManagementAPI.Services
@@ -33,7 +34,7 @@ namespace BookManagementAPI.Services
                 issuer: _configuration.GetSection("Jwt:Issuer").Value,
                 audience: _configuration.GetSection("Jwt:Audience").Value,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(5),
+                expires: DateTime.Now.AddMinutes(15),
                 signingCredentials: cred
             );
 

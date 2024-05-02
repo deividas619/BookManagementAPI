@@ -1,39 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using BookManagementAPI.DTOs;
+using BookManagementAPI.Interfaces;
 using BookManagementAPI.Models;
-using BookManagementAPI.Services.Repositories;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 namespace BookManagementAPI.Services;
 
-public class ReviewService : IReviewService
+public class ReviewService(IBookRepository bookRepository, IReviewRepository reviewRepository) : IReviewService
 {
-    private readonly IReviewRepository _reviewRepository;
-    private readonly IBookRepository _bookRepository;
-
-    public ReviewService(IReviewRepository reviewRepository, IBookRepository bookRepository)
-    {
-        _reviewRepository = reviewRepository;
-        _bookRepository = bookRepository;
-    }
-    public async Task<Review> AddReview(Book book, ReviewDto reviewDto, string userName)
+    public async Task<Review> AddReview(Guid bookId, ReviewDto reviewDto, string userName)
     {
         try
         {
-            var review = new Review
+            var book = await bookRepository.GetBookById(bookId);
+            if (book is not null)
             {
-                Text = reviewDto.Text,
-                Rating = reviewDto.Rating,
-                BookTitle = reviewDto.BookTitle,
-                BookId = book.Id,
-                CreatedByUserId = _reviewRepository.GetUserId(userName),
-            };
-            return await _reviewRepository.AddReview(book, review);
+                var review = new Review
+                {
+                    Text = reviewDto.Text,
+                    Rating = reviewDto.Rating,
+                    BookId = bookId,
+                    CreatedByUserId = bookRepository.GetUserId(userName),
+                };
+
+                return await reviewRepository.AddReview(book, review);
+            }
+            else
+            {
+                Log.Error($"[{nameof(AddReview)}]: No book match was found with id: {bookId}!");
+                return new Review { Text = "Not found" };
+            }
         }
         catch (Exception e)
         {
@@ -41,91 +38,47 @@ public class ReviewService : IReviewService
             throw;
         }
     }
-    public async Task<Review> RemoveReviewById(Guid id)
+
+    public async Task<Book> GetReviewsByBookId(Guid bookId)
     {
-        try
+        var book = await bookRepository.GetBookById(bookId);
+        if (book is not null)
         {
-            return await _reviewRepository.RemoveReviewById(id);
+            try
+            {
+                return await reviewRepository.GetReviewsByBookId(bookId);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[{nameof(GetReviewsByBookId)}]: {e.Message}");
+                throw;
+            }
         }
-        catch (Exception e)
+        else
         {
-            Log.Error($"[{nameof(RemoveReviewById)}]: {e.Message}");
-            throw;
+            Log.Error($"[{nameof(GetReviewsByBookId)}]: No book match was found with id: {bookId}!");
+            return null;
         }
     }
-
-    public async Task<IEnumerable<Review>> GetAllReviews()
+    public async Task<Review> RemoveReviewById(Guid reviewId)
     {
-        try
+        var currentReview = await reviewRepository.GetReviewById(reviewId);
+        if (currentReview is not null)
         {
-            return await _reviewRepository.GetAllReviews();
+            try
+            {
+                return await reviewRepository.RemoveReviewById(reviewId);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[{nameof(RemoveReviewById)}]: {e.Message}");
+                throw;
+            }
         }
-        catch (Exception e)
+        else
         {
-            Log.Error($"[{nameof(GetAllReviews)}]: {e.Message}");
-            throw;
+            Log.Error($"[{nameof(RemoveReviewById)}]: No review was found with id: {reviewId}!");
+            return new Review { Text = "Not found" };
         }
-    }
-
-    public async Task<IEnumerable<Review>> GetReviewsByBookTitle(string bookTitle)
-    {
-        try
-        {
-            return await _reviewRepository.GetReviewsByBookTitle(bookTitle);
-        }
-        catch (Exception e)
-        {
-            Log.Error($"[{nameof(GetReviewsByBookTitle)}]: {e.Message}");
-            throw;
-        }
-    }
-
-    public async Task<IEnumerable<Review>> GetReviewsByBookId(Guid bookId)
-    {
-        return await _reviewRepository.GetReviewsByBookId(bookId);
-    }
-
-
-    public async Task<(IEnumerable<Review>, double)> GetReviewsAndAverageRatingForBook(string bookTitle)
-    {
-        try
-        {
-            var reviews = await _reviewRepository.GetReviewsByBookTitle(bookTitle);
-            var averageRating = CalculateAverageRating(reviews);
-            return (reviews, averageRating);
-        }
-        catch (Exception e)
-        {
-            Log.Error($"[{nameof(GetReviewsAndAverageRatingForBook)}]: {e.Message}");
-            throw;
-        }
-    }
-
-    public async Task<double?> GetAverageRatingForBook(string bookTitle)
-    {
-        var reviews = await _reviewRepository.GetReviewsByBookTitle(bookTitle);
-        if (reviews == null || !reviews.Any())
-        {
-            return null; // No reviews found for the book
-        }
-
-        double averageRating = reviews.Average(r => r.Rating);
-        return averageRating;
-    }
-
-    private double CalculateAverageRating(IEnumerable<Review> reviews)
-    {
-        if (reviews == null || !reviews.Any())
-        {
-            return 0;
-        }
-
-        double totalRating = 0;
-        foreach (var review in reviews)
-        {
-            totalRating += review.Rating;
-        }
-
-        return totalRating / reviews.Count();
     }
 }

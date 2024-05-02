@@ -1,9 +1,9 @@
-﻿using BookManagementAPI.DTOs;
-using BookManagementAPI.Models;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using BookManagementAPI.DTOs;
+using BookManagementAPI.Models;
 
-namespace BookManagementAPI.Services
+namespace BookManagementAPI.Interfaces
 {
     public interface IAdminService
     {

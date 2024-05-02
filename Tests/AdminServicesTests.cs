@@ -1,6 +1,5 @@
 ﻿using BookManagementAPI.DTOs;
 using BookManagementAPI.Models;
-using BookManagementAPI.Services.Repositories;
 using BookManagementAPI.Services;
 using Moq;
 using System;
@@ -8,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BookManagementAPI.Interfaces;
 
 namespace Tests
 {

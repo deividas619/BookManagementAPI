@@ -1,10 +1,10 @@
-﻿using BookManagementAPI.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using BookManagementAPI.Interfaces;
+using BookManagementAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace BookManagementAPI.Services.Repositories
+namespace BookManagementAPI.Repositories
 {
     public class AdminRepository : IAdminRepository
     {

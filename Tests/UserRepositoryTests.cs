@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Moq;
 using BookManagementAPI.Models;
-using BookManagementAPI.Services.Repositories;
 using BookManagementAPI;
+using BookManagementAPI.Repositories;
 
 namespace Tests
 {

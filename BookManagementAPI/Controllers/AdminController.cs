@@ -1,10 +1,6 @@
-﻿using BookManagementAPI.DTOs;
-using BookManagementAPI.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using BookManagementAPI.Interfaces;
 
 namespace BookManagementAPI.Controllers
 {

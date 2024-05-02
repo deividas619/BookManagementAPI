@@ -9,10 +9,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using BookManagementAPI.Services;
-using BookManagementAPI.Services.Repositories;
 using Serilog;
 using System.Text.Json.Serialization;
 using System.Linq;
+using BookManagementAPI.Repositories;
+using BookManagementAPI.Interfaces;
 
 namespace BookManagementAPI
 {

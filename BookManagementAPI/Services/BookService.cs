@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BookManagementAPI.DTOs;
+using BookManagementAPI.Interfaces;
 using BookManagementAPI.Models;
-using BookManagementAPI.Services.Repositories;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 namespace BookManagementAPI.Services;
@@ -36,25 +37,45 @@ public class BookService(IBookRepository repository) : IBookService
         }
     }
 
-    public async Task<Book> AddBook(string title, string author, DateOnly publication, GenreDto genreDto, string userName)
+    public async Task<IEnumerable<Book>> GetBookSuggestions(Guid bookId)
     {
         try
         {
-            var genre = await GetGenre(genreDto);
-            return await repository.AddBook(new Book
-            {
-                Id = Guid.NewGuid(),
-                Title = title,
-                Author = author,
-                Publication = publication,
-                Genre = genre,
-                CreatedByUserId = repository.GetUserId(userName)
-            });
+            return await repository.GetBookSuggestions(bookId);
         }
         catch (Exception e)
         {
-            Log.Error($"[{nameof(AddBook)}]: {e.Message}");
+            Log.Error($"[{nameof(GetBookSuggestions)}]: {e.Message}");
             throw;
+        }
+    }
+
+    public async Task<Book> AddBook(string title, string author, DateOnly publication, GenreDto genreDto, string userName)
+    {
+        if (title.IsNullOrEmpty() || author.IsNullOrEmpty() || genreDto.Name.IsNullOrEmpty())
+        {
+            return null;
+        }
+        else
+        {
+            try
+            {
+                var genre = await GetGenre(genreDto);
+                return await repository.AddBook(new Book
+                {
+                    Id = Guid.NewGuid(),
+                    Title = title,
+                    Author = author,
+                    Publication = publication,
+                    Genre = genre,
+                    CreatedByUserId = repository.GetUserId(userName)
+                });
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[{nameof(AddBook)}]: {e.Message}");
+                throw;
+            }
         }
     }
 
@@ -95,25 +116,44 @@ public class BookService(IBookRepository repository) : IBookService
             }
             else
             {
-                return null;
+                Log.Error($"[{nameof(UpdateBook)}]: User is not authorized to edit book with id: {bookId}!");
+                return new Book { Title = "Unauthorized" };
             }
         }
         else
         {
-            return currentBook;
+            Log.Error($"[{nameof(UpdateBook)}]: No book match was found with id: {bookId}!");
+            return new Book { Title = "Not found" };
         }
     }
 
-    public async Task<Book> RemoveBookById(Guid id)
+    public async Task<Book> RemoveBookById(Guid bookId, string userName, string userNameRole)
     {
-        try
+        var currentBook = await repository.GetBookById(bookId);
+        if (currentBook is not null)
         {
-            return await repository.RemoveBookById(id);
+            if (repository.GetUserId(userName) == currentBook.CreatedByUserId || string.Compare(userNameRole, "Admin", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                try
+                {
+                    return await repository.RemoveBookById(bookId);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[{nameof(RemoveBookById)}]: {e.Message}");
+                    throw;
+                }
+            }
+            else
+            {
+                Log.Error($"[{nameof(RemoveBookById)}]: User is not authorized to delete book with id: {bookId}!");
+                return new Book { Title = "Unauthorized" };
+            }
         }
-        catch (Exception e)
+        else
         {
-            Log.Error($"[{nameof(RemoveBookById)}]: {e.Message}");
-            throw;
+            Log.Error($"[{nameof(RemoveBookById)}]: No book match was found with id: {bookId}!");
+            return new Book { Title = "Not found" };
         }
     }
 }
