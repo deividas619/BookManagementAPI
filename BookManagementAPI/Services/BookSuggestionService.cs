@@ -12,53 +12,53 @@ public class BookSuggestionService(IUserRepository userRepository, IReviewReposi
 {
     public async Task<List<Book>> GetBookSuggestionsAsync(Guid userId)
     {
-        var userReviews = await reviewRepository.GetReviewsByUserId(userId);
-        var allUsers = await userRepository.GetAllUsersAsync();
-        var otherUsers = allUsers.Where(u => u.Id != userId).ToList();
+        var allReviews = await reviewRepository.GetReviewsAsync();
+        var userReviews = allReviews.Where(r => r.CreatedByUserId == userId)
+            .ToList();
 
-        var distances = new List<(User, double)>();
+        var otherReviews = allReviews.Where(r => r.CreatedByUserId != userId)
+            .GroupBy(r => r.CreatedByUserId);
 
-        foreach (var other in otherUsers)
+        var distances = otherReviews.Select(group =>
+                (group.Key, CalculateEuclideanDistance(userReviews, group.ToList())))
+            .OrderBy(d => d.Item2)
+            .Take(3)
+            .ToList();
+
+        var nearestUserIds = distances.Select(d => d.Key)
+            .ToList();
+
+        var suggestedBooks = new HashSet<Book>();
+
+        foreach (var nearestUserId in nearestUserIds)
         {
-            var otherReviews = await reviewRepository.GetReviewsByUserId(other.Id);
-
-
-            var distance = CalculateEuclideanDistance(userReviews, otherReviews);
-            distances.Add((other, distance));
-        }
-
-        var nearestUsers = distances.OrderBy(d => d.Item2).Take(3).Select(d => d.Item1).ToList();
-
-        var suggestedBooks = new List<Book>();
-
-        foreach (var user in nearestUsers)
-        {
-            var books = await reviewRepository.GetReviewsByUserId(user.Id);
-            suggestedBooks.AddRange(books.Where(r => !userReviews.Select(ur => ur.BookId).Contains(r.BookId))
+            var books = allReviews.Where(r =>
+                    r.CreatedByUserId == nearestUserId && userReviews.All(ur => ur.BookId != r.BookId))
                 .Select(r => r.Book)
-                .Distinct());
+                .Distinct();
+
+            suggestedBooks.UnionWith(books);
         }
 
-        return suggestedBooks.Distinct().ToList();
+        return suggestedBooks.ToList();
     }
 
     private double CalculateEuclideanDistance(List<Review> userReviews, List<Review> otherReviews)
     {
-        var anyMatchingReviews = userReviews.Any(r => otherReviews.Any(or => or.BookId == r.BookId));
-        if (!anyMatchingReviews)
-            return double.MaxValue;
-
         double sumOfSquares = 0;
+        var foundMatching = false;
+
         foreach (var review in userReviews)
         {
             var otherReview = otherReviews.FirstOrDefault(r => r.BookId == review.BookId);
             if (otherReview != null)
             {
+                foundMatching = true;
                 double difference = review.Rating - otherReview.Rating;
                 sumOfSquares += difference * difference;
             }
         }
 
-        return Math.Sqrt(sumOfSquares);
+        return foundMatching ? Math.Sqrt(sumOfSquares) : double.MaxValue;
     }
 }

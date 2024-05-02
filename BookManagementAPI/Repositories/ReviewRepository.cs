@@ -96,7 +96,7 @@ public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
     {
         try
         {
-            return await context.Reviews.ToListAsync();
+            return await context.Reviews.Include(r => r.Book).ToListAsync();
         }
         catch (Exception e)
         {
