@@ -89,7 +89,7 @@ namespace Tests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("No book matches were found!", badRequestResult.Value);
+            Assert.Equal("No Book matches were found!", badRequestResult.Value);
         }
 
         [Fact]
@@ -120,7 +120,7 @@ namespace Tests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("Failed to add a book!", badRequestResult.Value);
+            Assert.Equal("Failed to add a Book!", badRequestResult.Value);
         }
 
         [Fact]
@@ -134,7 +134,7 @@ namespace Tests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("Failed to add a book!", badRequestResult.Value);
+            Assert.Equal("Failed to add a Book!", badRequestResult.Value);
         }
 
         [Fact]
@@ -183,7 +183,7 @@ namespace Tests
 
             // Assert
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result.Result);
-            Assert.Equal("User cannot edit this book!", unauthorizedResult.Value);
+            Assert.Equal("User cannot edit this Book!", unauthorizedResult.Value);
         }
 
         [Fact]
@@ -216,7 +216,7 @@ namespace Tests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("No book match was found!", badRequestResult.Value);
+            Assert.Equal("No Book match was found!", badRequestResult.Value);
         }
 
         [Fact]
@@ -232,7 +232,7 @@ namespace Tests
 
             // Assert
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result.Result);
-            Assert.Equal("User cannot delete this book!", unauthorizedResult.Value);
+            Assert.Equal("User cannot delete this Book!", unauthorizedResult.Value);
         }
     }
 }

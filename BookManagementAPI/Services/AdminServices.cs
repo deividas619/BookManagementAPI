@@ -88,7 +88,7 @@ namespace BookManagementAPI.Services
             }
             catch (Exception ex)
             {
-                return new ResponseDto(false, $"Failed to delete book: {ex.Message}");
+                return new ResponseDto(false, $"Failed to delete Book: {ex.Message}");
             }
         }
         public async Task<ResponseDto> AddBookAsync(BookDto bookDto)
@@ -106,7 +106,7 @@ namespace BookManagementAPI.Services
 
                 if (addedBook == null)
                 {
-                    return new ResponseDto(false, "Failed to add book");
+                    return new ResponseDto(false, "Failed to add Book");
                 }
 
                 return new ResponseDto(true, "Book added successfully");

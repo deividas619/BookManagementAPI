@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BookManagementAPI.Interfaces;
 using BookManagementAPI.Models;
@@ -20,6 +22,16 @@ namespace BookManagementAPI.Repositories
             var users = _context.Users;
             var result =  _context.Users.SingleOrDefault(x => x.Username == username);
             return _context.Users.SingleOrDefault(x => x.Username == username);
+        }
+
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
+        public async Task<List<Review>> GetReviewsByUserIdAsync(Guid userId)
+        {
+            return await _context.Reviews.Where(r => r.Id == userId).ToListAsync();
         }
 
         public void SaveNewUser(User user)

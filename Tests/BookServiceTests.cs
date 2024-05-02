@@ -139,7 +139,7 @@ namespace Tests
             // Arrange
             var bookId = Guid.NewGuid();
 
-            // Mocking the repository to return a book with title "Not found" when GetBookById is called with the specified bookId
+            // Mocking the repository to return a Book with title "Not found" when GetBookById is called with the specified bookId
             _mockBookRepository.Setup(repo => repo.GetBookById(bookId)).ReturnsAsync((Book)null);
 
             // Act
@@ -190,7 +190,7 @@ namespace Tests
             // Arrange
             var bookId = Guid.NewGuid();
 
-            // Mocking the repository to return a book with title "Not found" when RemoveBookById is called with the specified bookId
+            // Mocking the repository to return a Book with title "Not found" when RemoveBookById is called with the specified bookId
             _mockBookRepository.Setup(repo => repo.RemoveBookById(bookId)).ReturnsAsync(new Book { Title = "Not found" });
 
             // Act

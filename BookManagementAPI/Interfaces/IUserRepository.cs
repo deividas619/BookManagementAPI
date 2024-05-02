@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using BookManagementAPI.Models;
 
 namespace BookManagementAPI.Interfaces
@@ -10,5 +11,6 @@ namespace BookManagementAPI.Interfaces
         void SaveChangedUser(User user);
         public int GetRoleCount(UserRole role);
         Task<User> GetUserAsync(string username);
+        Task<List<User>> GetAllUsersAsync();
     }
 }

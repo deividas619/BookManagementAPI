@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BookManagementAPI.Interfaces;
@@ -43,6 +44,20 @@ public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
             throw;
         }
     }
+
+    public async Task<List<Review>> GetReviewsByUserId(Guid userId)
+    {
+        try
+        {
+            return await context.Reviews.Include(b => b.Book).Where(r => r.CreatedByUserId == userId).ToListAsync();
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{nameof(GetReviewsByUserId)}]: {e.Message}");
+            throw;
+        }
+    }
+
     public async Task<Review> GetReviewById(Guid id)
     {
         try
@@ -75,6 +90,19 @@ public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
         Log.Information($"[{nameof(RemoveReviewById)}]: Successfully removed review with id: {reviewId}");
 
         return reviewToRemove;
+    }
+
+    public async Task<List<Review>> GetReviewsAsync()
+    {
+        try
+        {
+            return await context.Reviews.Include(r => r.Book).ToListAsync();
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{nameof(GetReviewsAsync)}]: {e.Message}");
+            throw;
+        }
     }
 
     private decimal CalculateAvgRating(Book book)
